@@ -1,0 +1,33 @@
+
+	Пакетный менеджер
+		Это набор ПО для установки, обновления и удаления ПО.
+			1. Управляет зависимостями.
+			2. Имеет централизованный репозиторий (обычно).
+			3. Все программы в одном месте.
+				
+				
+	Один из пакетных менеджеров в Win  это Chocolatey.
+		chocolatey.org 
+			Для установки потребуется powerShell версии не ниже 3. 
+			Для Win 7  поможет установить сайт		
+				https://technet.microsoft.com/ru-ru/library/dn362783(v=ocs.15).aspx
+			Проверить версию фреймворка в реестре 
+				HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\NET Framework Setup\NDP
+			
+			Далее запуск PowerShell от администратора.
+			По умочанию он в режиме исполнения скриптов ОГРАНИЧЕННЫЙ.
+				Set-ExecutionPolicy Unrestricted 		// Меняем на неограниченный
+				iwr https://chocolatey.org/install.ps1 -UseBasicParsing | iex 		// Устанавливаем chocolatey
+				Set-ExecutionPolicy Restricted    									// Возврат в ограниченный режим
+				
+	Теперь в PowerShell можем через chocolatey устанавливать ПО
+			choco install babun -y			// ключ y это Да на все вопросы установщика
+											// установка POSIX слоя на Win
+											
+	Теперь в любой директории ПКМ в контекстном меню     Open Babun here
+		Мы окажемся в среде очень похожей на среду Linux
+				ls			// просмотр файлов в текущ каталоге
+				pwd 		// путь до текущей директории
+				
+				
+		
