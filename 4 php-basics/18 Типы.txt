@@ -1,0 +1,76 @@
+
+
+
+
+
+
+ССЫЛКИ
+	https://ru.wikipedia.org/wiki/Система_типов
+	https://ru.wikipedia.org/wiki/Сильная_и_слабая_типизация
+
+	http://help.hexlet.io/article/5-exercise-faq
+	https://repl.it/languages/php
+	https://ru.hexlet.io/courses/programming-basics/lessons/debug/theory_unit
+	http://php.net/manual/ru/funcref.php
+
+
+
+ЗАДАНИЕ 
+	Дано неотрицательное целое число num. Итеративно сложите все 
+	 входящие в него цифры до тех пор, пока не останется одна цифра.
+	Для числа 38 процесс будет выглядеть так:
+	3 + 8 = 11
+	1 + 1 = 2
+	Результат: 2
+	
+	Реализуйте функцию addDigits
+	Пример:
+	<?php
+	
+	addDigits(0); // 0
+	addDigits(1); // 1
+	addDigits(9); // 9
+	addDigits(10); // 1
+	addDigits(38); // 2
+	Подсказки
+	str_split($str) - функция для разбиения строки.
+	
+	
+	
+				// Мое решение
+				function addDigits($num)
+				{
+					$mass = str_split($num);
+
+					if (sizeof($mass) == 1) {
+						return $num;
+					} else {
+						while (sizeof($mass) > 1) {
+							$result = array_sum($mass);
+							$mass = str_split($result);
+						}
+						return $result;
+					}
+				}
+				
+				
+				
+				// Решение преподавателя
+				function addDigits($num)
+				{
+					if ($num < 10) {
+						return $num;
+					}
+					$result = $num;
+					while ($result >= 10) {
+						$result = array_sum(str_split((string) $result));
+					}
+
+					return $result;
+				}
+
+	
+	
+	
+	
+	

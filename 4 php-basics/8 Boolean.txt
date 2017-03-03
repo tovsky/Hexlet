@@ -1,0 +1,57 @@
+
+	Модуль числа
+	|a| = a, если а > 0 
+	|a| = -a, если a < 0
+	|0| = 0, если  a = 0
+		Здесь уже высказывания, это алгебра логики.
+		В программировании это булева алгебра.
+		
+	Операции булевой алгебры в программировании
+		! отрицание		(унарная операция (применяется к одному операнду))
+		&& И конъюкция
+		|| ИЛИ дизъюнкция
+		== совпадение
+		!= не совпадение
+		
+	Тип данных Bool
+		true
+		false
+		
+	
+			function isOdd($num) 				// Является ли число нечетным
+			{
+				return $num % 2 != 0;
+			}
+			var_dump(isOdd(3));			// true
+			var_dump(isOdd(4));			// false
+	
+______________________________________________________________________	
+			function isShortString($str)
+			{
+				$strLen = strlen($str);
+				return 4 < $strLen && $strLen < 10;   		// в PHP сложные высказывания строят из простых
+			}
+			var_dump(isShortString("long string, long string"));		// bool(false)
+			var_dump("short str");										// bool (true)		
+			
+			
+	
+	
+ССЫЛКИ
+	https://ru.wikipedia.org/wiki/%D0%91%D1%83%D0%BB%D0%B5%D0%B2%D0%B0_%D0%B0%D0%BB%D0%B3%D0%B5%D0%B1%D1%80%D0%B0
+	http://php.net/manual/ru/language.types.boolean.php
+
+	
+	
+ЗАДАНИЕ
+	Реализуйте функцию isBigEven, которая возвращает true в том случае если переданный параметр 
+	четное число, которое больше или равно 1000 и false в остальных случаях.
+			function isBigEven($num)
+			{
+				return $num % 2 == 0 && $num >= 1000;
+			}
+	
+	
+	
+	
+	

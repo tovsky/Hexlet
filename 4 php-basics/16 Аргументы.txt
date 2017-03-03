@@ -1,0 +1,87 @@
+
+	Необязательные аргументы функций
+				echo round(10.9);		// 11
+				echo round(10.234);		// 10
+				echo round(10.61234, 2);		// 10.61     второй параметр это точность округления
+
+				echo round(1.55, 1);		// 1.6
+				echo round(1.55, 1, PHP_ROUND_HALF_DOWN);		// 1.5
+				
+		Необязательные аргументы в РНР все позиционные. Если мы хотим передать третий обязательный
+		аргумент, то придется передать и 2 необязательный.
+		Все обязательные аргументы идут вначале, все необязательные идут в конце со значениями по умолчанию
+		
+		
+				function drop($array, $count = 1)		// Отбрасывает у массива по умолчанию 1 элемент.
+				{
+					$result = [];
+					for ($i = $count; $i < sizeof($array); $i++) {
+						$result[$i] = $array[$i];
+					}
+					
+					return $result;
+				}
+				
+				print_r(drop([1, 2, 3]));		// [2, 3]  
+				print_r(drop([1, 2, 3], 2));		// [3]    ставим значение необязательного аргумента 2.
+				
+				
+	Переменное число аргументов функций.
+			
+				function sumArgs(...$numbers)		// на входе массив аргументов
+				{
+					return array_sum($numbers);
+				}
+				
+				echo sumArgs(1, 2, 4);				// 7
+				
+				
+				
+				function sumArgs2($arg, ...$numbers)		// на входе обязат аргумент, а все остальные собираются в массив аргументов
+				{
+					return array_sum($numbers);
+				}
+				
+				echo sumArgs2(10, 2, 4);				// 6
+
+
+				
+ЗАДАНИЕ
+	Реализуйте функцию multiArgs, которая возвращает произведение всех переданных аргументов. 
+	 Вызванная без аргументов, должна вернуть null.
+	Пример:
+	null == multiArgs();
+	1 == multiArgs(1);
+	16 == multiArgs(2, 8);
+				
+				
+				// мое решение
+				function multiArgs(...$numbers) 
+				{
+					if (!empty($numbers)) {
+						$result = 1;
+						
+						foreach ($numbers as $num) {
+							$result = $result * $num;
+						}
+						return $result;
+					} else {
+						return null;
+					}
+				}
+				
+				// Решение преподавателя
+				function multiArgs(...$numbers)
+				{
+					if (empty($numbers)) {
+						return null;
+					}
+					return array_product($numbers);
+				}
+				
+				
+				
+			
+			
+			
+			

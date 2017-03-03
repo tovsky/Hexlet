@@ -1,0 +1,110 @@
+
+	Map. Словарь. Ассоциативный массив.
+		В PHP Все массивы ассоциативные.
+	
+				$map = ['key' => 'value', 'another_key' => 'another_value', 123, 'asdf'];
+				
+				
+				foreach ($map as $key => $value) {
+					// code.....
+				}
+				
+				
+				array_key_exist('underfined', $map);		// Проверка, что ключ присутствет в массиве
+				isset($map['underfined']);				// проверка есть ли значение по конкретному ключу
+				
+				
+	Example.
+			$users = [
+				['name' => 'john', 'age' => '22', 'from' => 'london'],
+				['name' => 'kate', 'age' => '23', 'from' => 'detroit'],
+				['name' => 'michael', 'age' => '29', 'from' => 'paris']
+			]
+			
+			function oldestUser($users)
+			{
+				if (empty($users)) {
+					return;  			// Если массив пользователей пустой, то просто выход
+				}
+				
+				$oldest = $users[0]['age'];
+				foreach ($users as $user) {
+					if ($user['age'] > $oldest) {
+						$oldest = $user['age'];
+					}
+				}
+				
+				return $oldest;
+			}
+			
+			echo oldestUser($users);
+			
+			
+			
+	Есть особенность, что некоторые функции работают с массивом как с ассоциативным, а некоторые как 
+	 с обычным и сбрасывают ключи.
+		sort
+		asort
+		ksort
+			
+			
+			
+			
+ЗАДАНИЕ
+	Реализуйте функцию wordsCount, которая считает количество одинаковых слов в предложении. 
+	 Результатом функции является ассоциативный массив в ключах которого слова из исходного текста, 
+	 а значения это количество повторений.
+	Пример:
+	wordsCount(""); // []
+	wordsCount("one two one"); // ["one" => 2, "two" => 1]
+	Подсказки
+	Разбиение строки по разделители explode.
+			
+				
+				// Мое решение
+				function wordsCount($str) 
+				{
+					$str = trim($str);
+					$tmp = explode(' ', $str);
+					$res = [];
+					
+					foreach ($tmp as $value) {
+						if ($value == '') {
+							continue;
+						}
+						
+						if (array_key_exists($value, $res)) {
+							$res[$value] += 1;
+						} else {
+							$res[$value] = 1;
+						}
+					}
+					
+					return $res;
+				}
+				
+				
+				
+				
+				// Решение преподавателя
+				function wordsCount($sentence)
+				{
+					$words = explode(" ", $sentence);
+					$result = [];
+					foreach ($words as $word) {
+						if (empty($word)) {
+							continue;
+						}
+						if (!array_key_exists($word, $result)) {
+							$result[$word] = 1;
+						} else {
+							$result[$word]++;
+						}
+					}
+
+					return $result;
+				}
+							
+							
+							
+			

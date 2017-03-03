@@ -1,0 +1,76 @@
+
+	Бывают ситуации, когда значение чего-либо отсутствует или неопределенно. 
+	Такое может возникать, когда данные отсутствуют, например:
+		работа с сетью.
+		чтение из файлов.
+		взаимодействие с БД и т.д.
+	
+	Тип данных NULL.
+		Регистро независиая константа  null. PSR рекоммендуте  null.
+		
+			is_null($var);		// Проверка, является ли переменная  null  или нет.
+	
+	
+	Вызов функции это выражение, а выражение всегда должно возвращать результат.
+	 Вызов пустой функции как раз вернет  null.  
+	 Если в функции будет просто   return,  то вернется  тоже  null.
+	 
+			example(); 			// null
+	 
+	Также  null  часто используют для задания значения необязат аргументам функции.
+			function example($var = null) 
+			{
+				.....
+			}
+	
+	
+	??  оператор  для  замены  нуля (некий эквивалент  isset)
+			$value = null;
+			$result = $value ?? 'nobody'; 		// nobody
+			// equivalent to:  $result = isset($value) ? $ value : 'nobody';
+				
+	
+	
+	
+ССЫЛКИ	
+	http://php.net/manual/ru/language.types.null.php
+	http://php.net/manual/ru/function.is-null.php
+	
+
+ЗАДАНИЕ
+	Реализуйте функцию compact которая принимает на вход массив и возвращает новый, полученный удалением элементов со значением null. 
+	 Ключи оставшихся элементов (тех которые не были null) должны сохраняться.
+	Пример:
+	<?php
+	compact([1, 2, null]); // [1, 2]
+	compact(['name' => 'mark', 'age' => null, 'sex' => 'yes']); // ['name' => 'mark', 'sex' => 'yes']
+	compact([2, null, '', 1, null, [], 0]); // [2, 2 => '', 1, 5 => [], 0]
+	
+					// Мое решение
+					function compact(array $array)
+					{
+						foreach ($array as $key => $value) {
+							if (is_null($value)) {
+								unset($array[$key]);
+							}
+						}
+						
+						return $array;
+					}
+
+
+					
+					// Решение преподавателя
+					   $newArray = [];
+						foreach ($array as $key => $value) {
+							if (!is_null($value)) {
+								$newArray[$key] = $value;
+							}
+						}
+
+						return $newArray;
+	
+	
+	
+	
+	
