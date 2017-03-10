@@ -1,0 +1,69 @@
+	
+	Задача хитрой сортировки
+		
+		
+		uksort
+		uasort
+		usort
+		
+		
+	В каком порядке будут располагаться в выходном массиве одинаковые значения после сортировки функцией usort? 
+	 Функция `usort` не гарантирует порядка для одинаковых элементов
+	 
+	 
+	 
+ЗАДАНИЕ
+	Реализуйте функцию sortByBinary, которая сортирует переданную коллекцию и возвращает новую коллекцию. 
+	 Сортировка происходит следующим образом:
+		Сортируем по количеству единиц в бинарном представлении (порядок следования не важен).
+		Если количество единиц одинаково, то сортируем на основе десятичного представления.
+	Пример:
+	[1, 2, 4, 3] == sortByBinary([3, 4, 2, 1]);
+						// мое решение
+						<?php
+
+						namespace App\Solution;
+
+						require getenv('COMPOSER_HOME') . '/vendor/autoload.php';
+
+						use function Functional\sort as fsort;
+
+						function sortByBinary ($array) {
+							return fsort($array, function($a, $b) {
+								$sort = substr_count(decbin($a), 1) - substr_count(decbin($b), 1);
+								if ($sort == 0) {
+									return $a - $b;
+								}
+								return $sort;
+							});
+						}
+		 
+		 
+		 
+		 
+						// контрольное решение
+						function sortByBinary($collection)
+						{
+							$onesCount = function ($number) {
+								$binary = decbin($number);
+								$bitsArray = str_split($binary);
+								return sizeof(array_filter($bitsArray, function ($bit) {
+									return $bit == "1";
+								}));
+							};
+
+							$sorted = fsort($collection, function ($prev, $next) use ($onesCount) {
+								$result = bccomp($onesCount($prev), $onesCount($next));
+								if ($result === 0) {
+									if ($prev > $next) {
+										return 1;
+									} else if ($prev < $next) {
+										return -1;
+									}
+									return 0;
+								}
+								return $result;
+							});
+
+							return $sorted;
+						}						

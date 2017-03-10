@@ -1,0 +1,123 @@
+
+	zip объединяет 2 и более массива и выдает новый в котором последовательно 
+	 объединены значения по совпадающим индексам.
+		// [1, 2] zip with [3, 4]     [[1, 3], [2,4]]
+		
+		
+	Для обычного PHP
+		// array map в PHP работает как zip при опред условиях
+					$result =array_map(null, range(1,3), range(11, 13))
+					print_r($result);			// будет [[1, 11], [2, 12], [3, 13]]
+					
+		// array_map   ниже код для понимания, что делает  null в примере выше
+					$result = array_map(function ($a, $b) {
+						return [$a, $b];					// можем писать null  и тогда можем не писать эту анонимную функцию 
+					}, range(1,3), range(11, 13))
+					print_r($result);			
+					
+					
+				
+	array_map не работает с итерируемыми объектами, работаем только с массивами
+	Полезные функции из библиотеки  Functional	
+		// Functional\zip
+					$result = zip(range(1, 3), range(11, 13)); 	// будет тоже, что и выше
+										
+	
+`array_map` объединяет в себе возможности `map`, `zip` и `zipWith`.
+Будет ли работать array_map если ему передать несколько массивов разного размера?	
+ Да, размер выходного массива будет равен размеру самого длинного массива
+ 
+
+
+	
+Примеры
+	// Returns [['one', 1], ['two', 2], ['three', 3]]
+	zip(['one', 'two', 'three'], [1, 2, 3]);
+
+	// Returns ['one|1', 'two|2', 'three|3']
+	zip(
+		['one', 'two', 'three'],
+		[1, 2, 3],
+		function ($one, $two) {
+			return $one . '|' . $two;
+		}
+	);
+	
+	
+ЗАДАНИЕ
+	Один из способов определения победителя в футболе это пенальти. Процесс идет так: В каждой 
+	 попытке бьет игрок каждой из команд и определяется команда победитель этой попытки. Процесс 
+	 продолжается до 5 попыток, хотя победитель может быть выявлен и раньше. Если после пяти 
+	 попыток победитель не выявлен, то процесс продолжается до первой выигранной попытки.
+	Реализуйте функцию bestAttempt которая принимает на вход результаты попыток и возвращает 
+	массив со списком имен футбольных клубов, которые победили в каждой из попыток. Если результатом п
+	опытки была ничья, то в результирующем массиве она не фигурирует (потому что никто не победил).
+
+	Пример:
+
+	$firstClubAttempts = [['name' => 'milan', 'scored' => 1], ['name' => 'milan', 'scored' => 0]];
+	$secondClubAttempts = [['name' => 'porto', 'scored' => 1], ['name' => 'porto', 'scored' => 1]];
+
+	['porto'] == bestAttempt($firstClubAttempts, $secondClubAttempts);
+	Подсказки:
+
+	array_map сохраняет ключи. Чтобы их сбросить, используйте array_values	
+	
+						// мое решение
+						<?php
+
+						namespace App\Solution;
+
+						require getenv('COMPOSER_HOME') . '/vendor/autoload.php';
+
+						use function Functional\map;
+						use function Functional\zip;
+
+						function bestAttempt($first, $second)
+						{
+							$bigArray = array_values(zip($first, $second,
+								function ($first, $second) {
+									if ($first['scored'] > $second['scored']) {
+										return $first['name'];
+									} elseif ($first['scored'] < $second['scored']) {
+										return $second['name'];
+									} else {
+										return null;
+									}
+								}
+							));
+
+							$result = array_filter($bigArray, function ($item) {
+								return $item != null;
+							});
+							return array_values($result);
+						}
+						
+						
+						
+						
+						// контрольное решение
+						function bestAttempt($first, $second)
+						{
+							$result = zip($first, $second, function ($result1, $result2) {
+								if ($result1['scored'] > $result2['scored']) {
+									return $result1['name'];
+								} else if ($result1['scored'] < $result2['scored']) {
+									return $result2['name'];
+								} else if ($result1['scored'] == $result2['scored']) {
+									return null;
+								}
+							});
+
+							$result2 = array_filter($result, function ($var) {
+								return !is_null($var);
+							});
+
+							return array_values($result2);
+						}
+	
+	
+	
+	
+	
+	

@@ -1,0 +1,49 @@
+
+
+	Какое количество аргументов может быть применено с помощью частичного применения функции?
+	 Любое количество, но меньше чем все.
+	 
+	На чем основано частичное применение функции?
+		На замыканиях
+		На лямбдах
+		
+		
+		
+ЗАДАНИЕ 
+	Реализуйте функцию mapWithPower, которая принимает на вход массив и степень, и возвращает 
+	 новый массив, в котором каждое значение возведено в переданную степень.
+
+	Пример:
+	[1, 1, 9, 100, 0] == mapWithPower([-1, 1, 3, 10, 0], 2)
+	Подсказки:
+	Возведение в произвольную степень - pow.
+						// мое решение
+						<?php
+
+						namespace App\Solution;
+
+						require getenv('COMPOSER_HOME') . '/vendor/autoload.php';
+
+						use function Functional\map;
+						use function Functional\partial_any;
+						use const Functional\…;
+
+						function mapWithPower($array, $n){
+							
+							$result = map($array , function($item) use ($n){
+								
+								return($item ** $n);
+								
+							});
+							
+							return $result;
+						}
+	
+	
+	
+						// контрольное решение
+						function mapWithPower($array, $power)
+						{
+							$func = partial_any('pow', …, $power);
+							return map($array, $func);
+						}

@@ -1,0 +1,30 @@
+
+ЗАДАНИЕ 
+	Реализуйте функцию reverseInt, которая переворачивает цифры в переданном числе:
+	31 == reverseInt(13);
+	-321 == reverseInt(-123);
+	
+	
+	
+	
+				// мое решение
+				function reverseInt($num)
+				{
+					$mussive = str_split($num);
+					krsort($mussive);
+
+					if ($num < 0) {
+						return -1 * (int)implode($mussive);
+					} else {
+						return (int)implode($mussive);
+					}
+				}
+				
+				
+				// Пример решения.
+				function reverseInt($num)
+				{
+					$reverse = (int) strrev((string) abs($num));
+					return $num > 0 ? $reverse : -$reverse;
+				}
+				

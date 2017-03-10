@@ -1,0 +1,24 @@
+
+ЗАДАНИЕ 
+	Реализуйте функцию binarySum, которая складывает переданные бинарные числа (как строки):
+	'11' == binarySum('10', '01');
+	'10010' == binarySum('1101', '101');
+	
+	
+				// мое решение
+				function binarySum($num1, $num2) 
+				{
+					return decbin(bindec($num1) + bindec($num2));
+				}				
+							
+
+							
+				// Пример решения.
+				function binarySum($first, $second)
+				{
+					return decbin((bindec($first) + bindec($second)));
+				}
+				
+				
+				
+				

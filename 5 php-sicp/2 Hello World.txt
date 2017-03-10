@@ -1,0 +1,22 @@
+
+	Запуск 
+		php test.php
+		
+		php -r 'echo"Hello!"';
+		
+		Interactive shell
+			php -a
+			echo 2* 3;
+		ctrl +c 		// Выход
+		
+	
+	
+	
+ССЫЛКИ
+	https://secure.php.net/manual/ru/language.basic-syntax.phptags.php
+	http://www.php-fig.org
+	
+Дополнения
+	Современный стандарт кодирования на php подразумевает что в php файлах 
+	 используется только открывающий тег <?php или даже <?=, но не используется закрывающий.
+	 

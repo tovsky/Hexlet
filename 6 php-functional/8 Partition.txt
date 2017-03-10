@@ -1,0 +1,51 @@
+
+	partition  по умолчанию нет в базовой библиотеке РНР
+	функция  partition  разбивает коллекцию на 2 коллекции по опред условию
+	
+	
+		
+		
+					use function Functional\partition
+					
+					$collection =  [new User(), new Admin(), new User()];
+					
+					list($admins, $users) = partition($collection, function ($user) {
+						return $user->isAdmin();
+					});
+					
+					print_r($admins);
+					print_r($users);
+					
+					
+ЗАДАНИЕ 
+	Реализуйте функцию separateEvenAndOddNumbers, которая принимает на вход массив чисел и 
+	 возвращает массив, в котором первый элемент - это массив четных чисел, 
+	 а второй элемент - это массив нечетных чисел, полученных из исходного массива.	
+	 
+						// мое решение 
+						<?php
+
+						namespace App\Solution;
+
+						use function Functional\partition;
+
+						function separateEvenAndOddNumbers($array)
+						{
+							list($odds, $evens) = partition($array, function ($num) {
+												return ($num % 2 !== 0);
+											});
+							
+							$res[0] = $evens;
+							$res[] = $odds;
+							return  $res;
+						}						
+						
+	
+						
+						// контрольное решение
+						function separateEvenAndOddNumbers($numbers)
+						{
+							return partition($numbers, function ($num) {
+								return $num % 2 == 0;
+							});
+						}

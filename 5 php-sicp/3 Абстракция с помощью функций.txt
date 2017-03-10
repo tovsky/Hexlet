@@ -1,0 +1,26 @@
+
+	Лямбда функция
+				$square = function($num) {
+					return $num * $num;
+				};
+
+	Литерал - это значение, указанное в коде программы.
+	
+	Функции первого класса можно передавать в качестве аргументов другим функциям, 
+	 возвращать их как результат других функций, присваивать их переменным или сохранять 
+	 в структурах данных. Функция высшего порядка — функция, принимающая в качестве 
+	 аргументов другие функции или возвращающая другую функцию в качестве результата.
+	
+	
+ССЫЛКИ
+	http://php.net/manual/ru/language.types.integer.php
+	http://php.net/manual/ru/language.operators.arithmetic.php
+	http://php.net/manual/ru/functions.user-defined.php
+	http://php.net/manual/ru/functions.returning-values.php
+	http://php.net/manual/ru/functions.anonymous.php
+	
+	
+	
+
+				
+				

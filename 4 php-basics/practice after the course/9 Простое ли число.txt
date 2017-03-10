@@ -1,0 +1,44 @@
+
+ЗАДАНИЕ 
+	Реализуйте функцию isPrime определяющую, является ли число простым.
+	Пример:
+	isPrime(1); // false
+	isPrime(7); // true
+	isPrime(10); // false
+	
+	
+				// мое решение
+				function isPrime($num) 
+				{   
+					if ($num <= 1) {
+						return false;
+					}
+					
+					for ($i = 2; $i <= $num / 2; $i++) {
+						if ($num % $i == 0) {
+							return false;
+						} 
+					}
+					
+					return true;
+				}
+				
+				
+				// Пример решения.
+				function isPrime($num)
+				{
+					if ($num < 2) {
+						return false;
+					}
+					for ($i = 2; $i <= $num / 2; $i++) {
+						if ($num % $i == 0) {
+							return false;
+						}
+					}
+
+					return true;
+				}
+				
+				
+				
+				

@@ -1,0 +1,31 @@
+
+ЗАДАНИЕ 
+	Реализуйте функцию lengthOfLastWord, которая возвращает длину последнего слова переданной 
+	 на вход строки. Словом считается любая последовательность не содержащая пробелов.
+	Примеры:
+	0 == lengthOfLastWord('');
+	5 == lengthOfLastWord('man in BlacK');
+	6 == lengthOfLastWord('hello, world!  ');
+	
+	
+				// мое решение
+				function lengthOfLastWord($str) 
+				{
+					$str = trim($str);
+					$muss = explode(' ', $str);
+					$elem = array_pop($muss);
+					
+					return strlen($elem);
+				}
+				
+				
+				// Пример решения.
+				function lengthOfLastWord($str)
+				{
+					$words = explode(' ', trim($str));
+					return strlen(end($words));
+				}
+				
+				
+				
+				
