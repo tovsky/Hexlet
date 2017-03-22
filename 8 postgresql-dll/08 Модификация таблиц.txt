@@ -1,0 +1,96 @@
+
+				-- Adding a Column
+				ALTER TABLE products ADD COLUMN description text;		// Добавление колонки с типом text. Также можем указывать констрейны и дефолты
+				ALTER TABLE products DROP COLUMN descripton;			// Удаление колонки с именем  description
+				
+				-- Adding a Constraint
+				ALTER TABLE products ADD CONSTRAINT some_name UNIQUE (product_no); 	 // Установили констрейн ЮНИК на колонку продакт№
+				ALTER TABLE products DROP CONSTRAINT some_name; 					// По сути обычные колонки не связаны с колонками, это индексы
+				
+				ALTER TABLE products ALTER COLUMN product_no SET NOT NULL;			// Констрейнт NOT NULL задается отдельно от других констрейнтов
+				ALTER TABLE products ALTER COLUMN product_no DROP NOT NULL;			// Констрейнт NOT NULL связан с колонкой
+				
+				-- Changing a Column's Default VAlue
+				ALTER TABLE products ALTER COLUMN price SET DEFAULT 7.77;
+				ALTER TABLE products ALTER COLUMN price DROP DEFAULT;
+				
+				-- Changing a Column's Data Type
+				ALTER TABLE products ALTER COLUMN price TYPE numeric(10, 2);
+				
+				-- Rename a Column 
+				ALTER TABLE products RENAME COLUMN product_no TO product_number;
+				
+				-- Renaming a Table 
+				ALTER TABLE products RENAME TO items;
+								
+				
+				
+ССЫЛКИ
+	https://www.postgresql.org/docs/9.1/static/sql-altertable.html
+	http://postgresql.ru.net/manual/ddl-alter.html
+	
+	
+ВОПРОСЫ
+	Никита СмолинPRO
+		6 строка в примере, что значит some_name здесь?
+	Kirill MokevninPRO
+		Имя констрейна (contstraint). Это просто произвольная строчка.
+	Dany Keep
+		А для чего констрейну может быть нужно имя?
+	Kirill MokevninPRO
+		Чтобы иметь возможность им манипулировать, например удалить.
+		
+
+ТЕСТЫ
+	Какие из этих изменений можно произвести при использовании ALTER TABLE?
+		изменение ограничения в колонке
+		переименование колонки
+		удаление колонки
+		добавление колонки
+		переименование таблицы
+		
+		ФДЕУК ЕФИДУ 
+ЗАДАНИЕ
+	solution.sql
+	Напишите запрос который изменит таблицу products так как описано ниже:
+
+	Поле name должно стать not null, unique и иметь тип character varying;
+	Добавьте поле amount типа integer;
+	Удалите default у поля price;
+	Запишите изменения в файл solution.sql
+						
+						// Мое решение
+							DROP TABLE IF EXISTS "products";
+
+							CREATE TABLE products (
+								id SERIAL PRIMARY KEY,
+								name text,
+								price numeric DEFAULT 1
+							);
+
+							-- BEGIN (write your solution here)
+							ALTER TABLE products ALTER COLUMN name SET NOT NULL;
+							ALTER TABLE products ADD CONSTRAINT uni UNIQUE (name);
+							ALTER TABLE products ALTER COLUMN name TYPE character varying;
+							ALTER TABLE products ADD COLUMN amount integer;
+							ALTER TABLE products ALTER COLUMN price DROP DEFAULT;
+							-- END
+						
+						
+						
+						
+						// Контрольное решение
+							-- BEGIN
+							ALTER TABLE products
+								ADD COLUMN amount integer,
+								ALTER COLUMN name TYPE varchar,
+								ALTER COLUMN name SET NOT NULL,
+								ADD CONSTRAINT name_uniq UNIQUE (name),
+								ALTER COLUMN price DROP DEFAULT;
+							-- END
+			
+		
+		
+		
+		
+		

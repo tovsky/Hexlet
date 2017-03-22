@@ -1,0 +1,250 @@
+					
+					class Application
+					{
+						private $name;				// используется только внутри объекта через  this
+						private $handlers = [];		// обработчики
+						private environment;
+						
+						public function __construct($name, $environment)	// конструктор срабатывает при создании объекта
+						{
+							$this->name = $name; 				// Установка свойств
+							$this->environment = $environment;
+						}
+						
+						public function addHandler($url, $func)
+						{
+							$this->handlers[$url] = $func;
+						}
+						
+						public function hasHandlers()
+						{
+							return !empty($this->handlers);		// проверка, что коллекция существует
+						}
+						
+						public function setName($name)
+						{
+							return $this->name = trim($name);		// this  ссылка на текущий объект (получаем состояние текущего объекта)
+						}
+						
+						public function getName()
+						{
+							return $this->name;
+						}
+						
+						public function isTest()		// проверка наличия флага, или текущего состояния или 
+						{
+							return "test" === $this->environment;
+						}
+					}
+					
+					
+					$app = new Application("name", "development");
+					
+		Существует определенное соглашение ( get  и  set)	гетеры		
+					print_r($app->getName());
+					print_r($app->setName("another name"));
+		Почему не используем сразу name ?  Это смысл объектов (инкапсуляция).
+			Обработчики 
+					addHandler		когда добавляем
+					hasHandlers		когда проверяем имеется ли коллекция
+					
+			
+		Методы is get add has  должны быть не изменяемыми, они делают проверку, но не меняют состояние объекта. 		
+						
+	
+ССЫЛКИ
+	http://php.net/manual/en/language.oop5.visibility.php
+	http://php.net/manual/ru/language.oop5.visibility.php
+	http://optimization.guide
+	
+ВОПРОСЫ
+	Александр О.PRO
+		Долго пытался сделать циклами, но не смог, потом додумался до такого способа. 
+		 Как сделать это же задание с использованием циклов ?
+
+			А зачем? Весь курс Вас призывают пользоваться функциями высшего порядка. :)
+
+		Я не могу понять, как обращаться к элементу массива в котором содержится объект, 
+		 вернее к свойствам этого объекта.
+
+			Да по-сути так же, как Вы это делали в функции array_filter. Каждый элемент 
+			 массива представляет собой объект, т.е. получаете элемент массива, а 
+			 от него посредством т.н. объектного оператора -> получаете доступ к его свойствам.
+
+	Дмитрий Макух
+		Скажите что лучше использовать array_reduce или foreach к чему себя приучать
+	Тимур МаликинPRO
+		array_reduce - Чистая функция, я стараюсь использовать ее, но если мне надо 
+		 менять состояние то foreach. Ну типа так -
+
+				foreach ($this->rules as $rule) {
+							$error = $rule->apply($node)->getError();
+							if (isset($error)) {
+								$this->errors[] = $error;
+							}
+						}
+		Может не очень объяснил :)
+	Дмитрий Макух ТС
+		А когда использовать array_filter, он в ответах учителя использован 
+		 для удаления по id то есть для изменения состояния это хорошая практика или это как пример
+	Тимур МаликинPRO
+		Нет, fiter тоже чистая функция, она вам тоже возвращает НОВЫЙ массив при этом 
+		 не изменяя старый. И не производит сайд эффектов - не изменяет переменных других, 
+		  не производит записи в файл. Можно, конечно, умеючи но это не правильно. 
+		  Функция приняла данные и вернула новые.
+	Kirill MokevninPRO
+		В php это распространено меньше, но в остальных языках использование функций 
+		 высших порядков (там где они есть), это предпочтительная практика. 
+		 Лично я не писал циклов в продакшен коде очень много лет и в коде хекслета (а кода много) 
+		  нет ни одного цикла.
+	Андрей СвитловPRO
+		а что работает быстрее ?
+	Kirill MokevninPRO
+		В императивных языках скорее всего работают циклы, но вы никогда (с очень высокой 
+		 вероятностью) не упретесь в это. Оптимизация она на уровне количества итераций. 
+		 Обязательно к прочтению: http://optimization.guide
+
+
+	
+	
+ЗАДАНИЕ
+	Реализуйте в классе Shop\Cart следующие методы:
+
+	add - для добавления товаров в корзину
+	count - для получения количества товаров в корзине
+	total - для получения общей суммы товаров в корзине
+	remove - для удаления товара из корзины по id
+	clear - для очистки корзины
+	
+	Пример:
+
+	use Shop\Cart;
+
+	$cart = new Cart();
+
+	$cart->add(new Item(1, "milk", 5))
+	$cart->add(new Item(2, "water", 2));
+
+	$cart->count(); // 2
+	$cart->total(); // 7
+
+	$cart->remove(2);
+
+	$cart->count(); // 1
+	$cart->total(); // 5
+
+	$cart->clear();
+
+	$cart->count(); // 0
+	$cart->total(); // 0
+	
+						// мое решение 
+							// Cart.php
+							<?php
+
+							namespace Shop;
+
+							class Cart
+							{
+							  private $items = [];
+
+							  // BEGIN (write your solution here)
+								public function add($item)
+							  {
+								  $this->items[] = $item;
+							  }
+
+							  public function count()
+							  {
+								  return count($this->items);
+							  }
+
+							  public function total()
+							  {
+								  return array_reduce($this->items, function ($sum, $item) {
+									  return $sum + $item->price;
+								  }, 0);
+							  }
+
+							  public function remove($num)
+							  {
+								  $res = [];
+								  foreach ($this->items as $key => $item) {
+									if ($item->id != $num) {
+										$res[] = $item;
+									}
+								  }
+									
+								$this->items = $res;
+							  }
+
+							  public function clear()
+							  {
+								  unset($this->items);
+								  $this->items = [];
+							  }
+							  // END
+							}
+
+							
+							
+							
+							// Item.php
+							<?php
+
+							namespace Shop;
+
+							class Item
+							{
+							  public $id;
+							  public $name;
+							  public $price;
+
+							  public function __construct($id, $name, $price)
+							  {
+								$this->id = $id;
+								$this->name = $name;
+								$this->price = $price;
+							  }
+							}
+							
+							
+							
+	
+							
+							
+						// контрольное решение
+							// Cart.php
+							  public function add(Item $item)
+							  {
+								$this->items[] = $item;
+							  }
+
+							  public function count()
+							  {
+								return count($this->items);
+							  }
+
+							  public function total()
+							  {
+								return array_reduce($this->items, function ($sum, $item) {
+								  return $sum + $item->price;
+								}, 0);
+							  }
+
+							  public function remove($id)
+							  {
+								$this->items = array_values(array_filter($this->items, function (Item $item) use ($id) {
+								  return $id !== $item->id;
+								}));
+							  }
+
+							  public function clear()
+							  {
+								$this->items = [];
+							  }
+							
+							
+					
+					
+					

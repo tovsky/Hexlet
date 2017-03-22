@@ -1,0 +1,18 @@
+
+Классы
+	$app instanceof Application;		// true  если  $app  объект класса  Application
+	
+	get_class($obj); 				// Возвращает имя класса, к которому принадлежит объект $obj
+	
+Массивы
+	$result = count(   );			// Подсчитывает количество элементов массива или что-то в объекте
+	
+	number array_sum ( array $array ) 	// Вычисляет сумму значений массива.
+	
+	bool array_key_exists ( mixed $key , array $array ) 	// Проверяет, присутствует ли в массиве указанный ключ или индекс
+	
+	
+Файлы
+	bool file_exists ( string $filename )   // Проверяет наличие указанного файла или каталога. filename Путь к файлу или каталогу. 
+
+	

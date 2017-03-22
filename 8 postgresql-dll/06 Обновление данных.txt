@@ -1,0 +1,80 @@
+
+					UPDATE products set price = 4;		// Эта команда во всех полях таблицы products сделает price 4
+					
+					UPDATE products set price = 5 where product_no = 2;		// Установится значение price 5 в поле где product_no 2
+	
+	Можем обновить сразу несколько значений
+					UPDATE products set price = 2 where product_no > 1;	
+					
+	Можем использовать предыдущее значение 				
+					UPDATE products set price = price + 3;		// Во всех полях значение price будет увеличено на 3.
+					
+
+
+		
+ССЫЛКИ
+	https://www.postgresql.org/docs/9.1/static/sql-update.html
+	http://postgresql.ru.net/manual/dml-update.html 
+	
+	
+	
+ТЕСТЫ
+	Что если в команде UPDATE не указать WHERE?
+		будут обновлены все записи в таблице.
+		
+	Возможно ли реализовать такой запрос с помощью UPDATE: "везде, где порядковый номер меньше ста, 
+	 увеличить порядковый номер на 4"?
+		да
+	
+	Дана таблица orders:
+	+--------------------------------------------------+
+	|    number     |       name      |      order     |
+	+--------------------------------------------------+
+	|    33         |    Peter F.     |     495826     |
+	|    34         |    Alex N.      |     857372     |
+	|    35         |    Jake O.      |     858737     |
+	+--------------------------------------------------+
+	Какое значение order будет у поля с номером (number) "34" после выполнения следующей команды:
+	update orders set order = order + 99, name = 'Jake O.' where order < 858000
+	?
+			857471
+				
+
+ЗАДАНИЕ
+	solution.sql
+	Увеличьте прайс в два раза для записи с именем nissan.
+	Установите имя в bmw для записи с id равным 10.
+	Запишите запросы в файл solution.sql.
+
+
+						// мое решение совпадает с контрольным.
+							DROP TABLE IF EXISTS "cars";
+
+							CREATE TABLE cars (
+								id integer PRIMARY KEY,
+								name character varying UNIQUE NOT NULL,
+								price numeric
+							);
+
+							INSERT INTO cars VALUES (1, 'nissan', 1.12);
+							INSERT INTO cars (id, name) VALUES (10, 'kia');
+														
+							-- BEGIN
+							UPDATE cars SET price = price * 2 WHERE name = 'nissan';
+							UPDATE cars SET name = 'bmw' WHERE id = 10;
+							-- END
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+
+
+
+				

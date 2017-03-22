@@ -1,0 +1,178 @@
+	
+	Перегрузка в РНР означает совсем не тоже самое к чему привыкли люди в других ЯП.
+	Перегрузка в РНР означает создание динамических свойств
+	
+	Странно использовать, когда в классе уже есть свойства, а то получится, что часть свойств фиксированные, а
+	 часть динамические.
+	Стоит использовать, когда объект реально динамический, который получается из каких-то неструктурированных данных.
+	
+	
+		// имеется класс 
+					class DynamicProps
+					{
+						private $data = [];
+						
+						public $declared = 1;
+						private $hidden = 2;
+						
+						public function __set($name, $value)	// маг метод __set  принимает на вход имя и значение
+						{
+							$this->data[$name] = $value;		// типичный способ обработки вход параметров это использование массива (по переданному ключу сохраняем значение)
+						}
+						
+						public function __get($name)			// маг метод __get  по ключу возвращает значение
+						{
+							return $this->data[$name];
+						}
+						
+						public function getHidden()
+						{
+							return $this->hidden;
+						}
+						
+						/* public function __isset();  */		// проверка существования дин свойства
+						/* public function __unset();  */		// удаление дин свойство
+					}
+					
+					$obj = new DynamicProps();				// Создаем экземпляр объекта
+					$obj->customKey = 'value3';				// свойства customKey нет внутри класса. Оно создается динамически через магический метод  __set
+					echo $obj->customKey;					// Вывод динамического свойства (происходит через магический метод  __get ).
+					
+					
+	Если дополнительно реализуем два маг метода  __isset и  __unset , то можем писать
+					isset($obj->customKey);			// Проверка существования динамического свойства
+					unset($obj->customKey);			// Удаление 
+					
+					
+	Если в классе существуют уже свойства, то __set и __get не будут вызываны (логично что вначале идет проверка на существование).
+	
+	В случае со свойствами private , если мв решим уже имеющейся установить снаружи, то будет вызван метод 
+	 __get , так как к приватному свойству у нас нет доступа снаружи (мы его не видим).
+	 
+	 
+ТЕСТЫ 
+	Что произойдет если мы попробуем установить значение в приватное свойство объекта класса у которого реализован __set?
+		Будет вызван __set потому что приватное свойство не участвует в этом процессе.
+	 
+	Какой метод нужно реализовать в классе, чтобы сработала проверка isset($obj->property)
+		__isset
+					
+					
+			
+
+ЗАДАНИЕ
+
+	file: DynamicProps.php
+	Создайте класс-обертку над ассоциативным массивом. Назовите его DynamicProps. Он должен 
+	 принимать в конструктор ассоциативный массив.
+
+	Реализуйте доступ к значениям этого массива через __get.
+	Реализуйте установку значений через __set.
+	Реализуйте проверку на существования ключа через __isset.
+	Реализуйте удаление ключа через __unset.
+	При попытке обратиться через __set или __get к динамическому свойству, для которого 
+	 нет ключа в массиве, необходимо выбрасывать исключение DynamicPropsUndefinedProp.
+						
+					
+					
+					
+								// мое решение 
+									// файл DynamicProps.php
+										<?php
+
+										namespace App;
+
+										require_once "DynamicPropsUndefinedProp.php";
+
+										// BEGIN (write your solution here)
+										class DynamicProps
+										{
+											public $values = [];
+
+											public function __construct($values)
+											{
+												$this->values = $values;
+											}
+
+											public function __get($key)
+											{
+												if (!array_key_exists($key, $this->values))
+														throw new DynamicPropsUndefinedProp();
+													return $this->values[$key];
+											}
+
+											public function __set($key, $value)
+											{
+												if (!array_key_exists($key, $this->values))
+													throw new DynamicPropsUndefinedProp();
+												$this->values[$key] = $value;
+											}
+
+											public function __isset($key)
+											{
+												return array_key_exists($key, $this->values);
+											}
+
+											public function __unset($key)
+											{
+												unset($this->values[$key]);
+											}
+
+										}
+										// END
+									
+									
+									
+									// файл DynamicPropsUndefinedProp.php
+										<?php
+
+										namespace App;
+
+										class DynamicPropsUndefinedProp extends \Exception
+										{
+										}
+
+									
+									
+																		
+								// контрольное решение
+									// BEGIN
+									class DynamicProps
+									{
+										private $data = [];
+
+										public function __construct(array $data)
+										{
+											$this->data = $data;
+										}
+
+										public function __set($name, $value)
+										{
+											if (!array_key_exists($name, $this->data)) {
+												throw new DynamicPropsUndefinedProp("{$name} is undefined");
+											}
+
+											$this->data[$name] = $value;
+										}
+
+										public function __get($name)
+										{
+											if (!array_key_exists($name, $this->data)) {
+												throw new DynamicPropsUndefinedProp("{$name} is undefined");
+											}
+
+											return $this->data[$name];
+										}
+
+										public function __isset($name)
+										{
+											return array_key_exists($name, $this->data);
+										}
+
+										public function __unset($name)
+										{
+											unset($this->data[$name]);
+										}
+									}
+									// END
+					

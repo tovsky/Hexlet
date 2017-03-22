@@ -1,0 +1,40 @@
+
+	Проблематика
+		Коллизия имен, нельзя создать два разных класса (две сущности) но с одинаковым именем.
+		Модульность, неймспейсы (везде по разному называют)призваны разрешить коллизию.
+		
+					namespace Theory;	// В начале файла 
+					
+					class Applicaton 
+					{
+						public $name = "nick";
+					}
+					
+					$app = new Applicaton();
+					$app->name = "My name";
+					var_dump($app);		// будет выведено, что  $app это 
+										// object(Theory\Applicaton) 
+										
+		Если мы  из другого файла хотим создать объект класса Applicaton
+		 то нужно писать полно имя пространства имен		
+					$a = new Theory\Applicaton();
+		А еще лучше обращаться прямо от корня пространства имен
+					$a = new \Theory\Applicaton();		
+
+					echo get_class($a);			// выведет  Theory\Applicaton
+					
+		В неймспейсах также можно определять константы функции.
+		В одном файле можно определять несколько неймспейсов.
+		
+					
+					
+ССЫЛКИ
+	http://php.net/manual/en/language.namespaces.php
+	http://php.net/manual/ru/language.namespaces.php
+	
+	
+	
+					
+					
+					
+					

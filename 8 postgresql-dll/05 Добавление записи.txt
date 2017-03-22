@@ -1,0 +1,80 @@
+
+	Вставляем все значения полседовательно
+					insert into products values (3, 'car', 3.55);		// Значения должны идти в том же порядке и тогоже типа, что в таблице  products.
+					
+					select * from products;						// Выбор всех значений в таблице  products
+	
+	Если много полей, то явно указываем те, которые вставляем.
+					insert into products (product_no, price) values (5, 3.55);
+	
+	Также можем делать вставку сразу многих строк
+					insert into products values (3, 'car', 3.55), (5, 'bmw', 7.77);
+		а еще так			
+					insert into products (product_no, price) values (5, 3.55), (9, 6.78);
+	
+	
+	Удаление всех значений
+					delete from products;						// Удаление всех записей в таблице
+	Удаление некоторых значений
+					deleet from products where price = 10;		// Удалит строки где значение  price=10 
+					deleet from products where product_no = 5;	// Как правило удаляют по уникальному PRIMARY KEY
+	
+	
+	
+ССЫЛКИ
+	https://www.postgresql.org/docs/9.4/static/sql-insert.html
+	http://postgresql.ru.net/manual/dml-insert.html
+	
+
+ТЕСТЫ
+	В каком порядке должны быть указаны данные при использовании команды insert?
+		в таком же порядке как у колонок в таблице.
+		
+	Что будет, если попытаться вставить запись, которая нарушает ограничение уникальности?
+		апись не будет вставлена, появится сообщение об ошибке.
+
+	Что будет, если попытаться удалить из таблицы несуществующие значения?
+		Ничего.
+		
+		
+		
+ЗАДАНИЕ
+	solution.sql
+		Добавьте в таблицу cars две записи: (1, nissan, 1.12) и (10, kia, null).
+		Напишите запросы в файл solution.sql.
+		
+		
+						// мое решение
+							DROP TABLE IF EXISTS "cars";
+
+							CREATE TABLE cars (
+								id integer PRIMARY KEY,
+								name character varying UNIQUE NOT NULL,
+								price numeric
+							);
+
+							-- BEGIN (write your solution here)
+							INSERT INTO cars VALUES (1, 'nissan', 1.12), (10, 'kia', NULL);
+							-- END
+							
+						
+						
+						
+						// контрльное решение
+							-- BEGIN
+							INSERT INTO cars VALUES (1, 'nissan', 1.12);
+							INSERT INTO cars (id, name) VALUES (10, 'kia');
+							-- END
+		
+		
+		
+		
+		
+		
+		
+		
+
+	
+	
+	
+	

@@ -1,0 +1,123 @@
+
+	Исключения - один из способов работы ошибками в коде.
+	Исключения технически это некоторые классы, наследуемые от класса Exception.
+	
+	Исключения нужны в том случае, когда ситуация исключительная.
+	Это когда функция стсталкивается с стиуацией, когда не знает, что делать, тогда она бросает Исключение.
+	
+	Ваша библиотека должна создать свою иерархию исключений.
+	
+
+ТЕСТЫ
+	Перехватив исключение мы можем выбросить новое, причем любого типа.
+	Наследование исключений позволяет перехватывать одним блоком целый класс исключений.
+	
+	Зачем нужны исключения?
+		Для передачи управления из места возникновения ошибки в то место, где она может быть обработана.
+		
+	Исключения можно не обрабатывать.
+	
+
+ЗАДАНИЕ
+	В данном упражнении вы реализуете небольшую библиотеку для работы с файлами. Ваша задача - написать 
+	 функцию для чтения файла. Функция должна возвращать содержимое файла, имя которого передается в 
+	 качестве аргумента. Если файл не существует - должно бросаться исключение.
+
+	src/File/Exceptions/FileException.php
+		Напишите класс исключения FileException. Унаследуйте его от базового класса Exception. 
+		Это будет базовое исключение, от которого будут наследоваться другие исключения в вашей библиотеке.
+
+	src/File/Exceptions/FileNotFoundException.php
+		Напишите класс исключения FileNotFoundException и унаследуйте его от FileException. Это 
+		 исключение должно бросаться в случае, если файл не существует.
+
+	src/File/Solution.php
+		Напишите функцию read. Она должна принимать на вход имя файла и возвращать его содержимое. 
+		 В случае, если файл не существует, она должна бросать исключение FileNotFoundException.
+
+	Подсказки:
+	Чтобы узнать существует файл или нет, используйте функцию file_exists
+	Чтобы получить содержимое файла, используйте функцию file_get_contents	
+	
+	
+	
+						// мое решение
+							// файл File/Exceptions/FileException.php
+								<?php 
+
+								namespace File\Exceptions;
+
+								// BEGIN (write your solution here)
+								class FileException extends \Exception
+								{
+
+								}
+								// END
+	
+	
+							// файл  src/File/Exceptions/FileNotFoundException.php
+							<?php 
+
+							namespace File\Exceptions;
+
+							// BEGIN (write your solution here)
+							class FileNotFoundException extends FileException
+							{
+								
+							}
+							// END
+								
+	
+							// файл File/Solution.php
+							<?php
+
+							namespace File;
+
+							// BEGIN (write your solution here)
+							function read($nameFile)
+							{
+								try {
+									if (!file_exists($nameFile))
+										throw new Exceptions\FileNotFoundException();
+									return file_get_contents($nameFile);
+								} catch (FileNotFoundException $e) {
+
+								}
+							}
+							// END
+	
+	
+	
+	
+	
+						// контрольное решение 
+							// файл File/Exceptions/FileException.php
+							// BEGIN
+							class FileException extends \Exception
+							{
+							}
+							// END
+							
+							
+							
+							// файл  src/File/Exceptions/FileNotFoundException.php
+								// BEGIN
+								class FileNotFoundException extends FileException
+								{
+								}
+								// END
+							
+	
+							// файл File/Solution.php
+								// BEGIN
+								function read($filename)
+								{
+									if (!file_exists($filename)) {
+										throw new Exceptions\FileNotFoundException("File {$filename} does not exist");
+									}
+									return file_get_contents($filename);
+								}
+								// END
+		
+		
+		

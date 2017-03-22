@@ -1,0 +1,88 @@
+
+	При создании таблицы мы можем задать значение по умолчанию.
+				CREATE TABLE products (
+					products_no integer PRIMARY KEY,
+					name character varying,
+					price numeric DEFAULT 3.3				// Значение по умолчанию
+				);
+	
+	Если мы	его не передадим, то у него возникнет по умолчанию значение.
+				INSERT INTO products (products_no) values (4); 		// Создастся запись для которой price = 3.3
+				
+				
+	Автоинкремент не является стандартом SQL  это  расширение MySQL, стандартом 
+	 является механизм, что DEFAULT может принимать не только конкретное значение, но и выражение.
+	Механизм  sequence  является стандартом SQL .
+	
+				CREATE sequence serial;					// Создали sequence  с именем  serial
+	 
+				\d 										// Увидим что среди таблиц появилась сущность с типом sequence
+			
+	На самом деле сущность sequence  это тоже таблица. Мы можем сделать к ней запрос.
+				SELECT * FROM serial;
+	
+	По сути  sequence  это генератор чисел (его можно по разному настроить)
+	 nextval функция которая принимает название последовательности и по сути прибавляет каждый раз значение 
+				
+	Создание автоинкремента в таблице.
+				CREATE TABLE products (
+					products_no integer PRIMARY KEY DEFAULT nextval('serial'), 		// в функцию  nextval  передали название последовательнсоти 		
+					name character varying,
+					price numeric DEFAULT 3.3				// Значение по умолчанию
+				);
+				
+				
+	PostreSQL предоставляет удобный механизм для создания sequence 
+				CREATE TABLE products (
+					products_no SERIAL PRIMARY KEY, 		// за место типа колонки указали SERIAL, ну и сделаем ее еще PRIMARY KEY
+					name character varying,
+					price numeric DEFAULT 3.3				// Значение по умолчанию
+				);			
+				
+				
+				
+ССЫЛКИ
+	https://www.postgresql.org/docs/9.4/static/ddl-default.html
+	http://postgresql.ru.net/manual/ddl-default.html
+	
+	
+	
+ТЕСТЫ 
+	Что будет если в запросе INSERT указать значение для поля, у которого есть значение по-умолчанию?
+		будет использовано введенное значение.
+	
+	Является ли sequence стандартом SQL?
+		да.
+		
+		
+ЗАДАНИЕ
+	solution.sql
+		Создайте таблицу cars. Сделайте поле id типа SERIAL, текстовое поле name и поле price со 
+		 значением по умолчанию равным 1.22.
+		Запишите запросы в файл solution.sql.
+						
+						// мое решение совпадает с контрольным
+							DROP TABLE IF EXISTS "cars";
+
+							-- BEGIN (write your solution here)
+							CREATE TABLE cars (
+								id SERIAL PRIMARY KEY,
+								name character varying,
+								price numeric DEFAULT 1.22
+							);
+							-- END
+
+							INSERT INTO cars (name) VALUES ('first') , ('second');
+		
+		
+	
+	
+	
+	
+	
+	
+	
+	
+	
+				
+				

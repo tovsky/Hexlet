@@ -1,0 +1,155 @@
+
+	ООП - способ создания кастомных типов в императивных языках.
+		ООП головного мозга, когда прогеры начинают запихивать ООП везде.
+		
+					class Application
+					{
+						public $name;		// огромное кол-во языков не содержит public  и прочее. Это принято помогать, но ээфективность не доказана
+					}
+	
+					$app = new Application();
+					var_dump($app);
+					
+					$app->name = "nick";
+					echo $app->name;
+					
+					$app2 = new Application;
+					$app3 = new Application;
+					
+					var_dump($app2 === $app3); 	// будет false
+												// объекты вроде равны, но у каждого свой идентифкатор и они не равносильны
+												// объекты одного и тоже класса не равны между собой. Это разные сущности.
+												
+					[1, 2] == [1, 2];			// А вот здесь будет true (сравнение по значениям)
+					
+					var_dump($app instanceof Application);		// будет true
+					
+					
+				
+ССЫЛКИ
+	http://php.net/manual/en/language.oop5.php
+	http://php.net/manual/ru/language.oop5.php
+	
+	
+ЗАДАНИЕ
+	Корзина используется в интернет магазинах для помещения в них товаров, 
+	 которые посетитель собирается приобрести.
+
+	Cart.php
+	Реализуйте класс корзины Cart, объявив в нем публичное поле items, 
+	 в котором должен храниться список товаров. Инициализируйте поле пустым массивом.
+
+	Solution.php
+	Реализуйте следующие функции:
+		addToCart, которая добавляет в корзину товар, переданный в качестве второго аргумента
+		getCount, которая возвращает количество товаров, помещенных в корзину
+		getTotal, которая возвращает суммарную стоимость товаров, помещенных в корзину
+	
+	Пример:
+		use Shop\Cart;
+		use function Solution\addToCart;
+		use function Solution\getCount;
+		use function Solution\getTotal;
+
+		$cart = new Cart();
+
+		addToCart($cart, new Item("milk", 5))
+		addToCart($cart, new Item("water", 2));
+
+		getCount($cart); // 2
+		getTotal($cart); // 7
+
+		addToCart($cart, new Item("juice", 10));
+
+		getCount($cart); // 3
+		getTotal($cart); // 17
+
+						// мое решение
+							// Файл Cart.php
+							<?php
+
+							namespace Shop;
+
+							class Cart
+							{
+								public $items = [];
+							}
+								
+								
+							// Item.php
+							<?php
+
+							namespace Shop;
+
+							class Item
+							{
+							  public $name;
+							  public $price;
+
+							  public function __construct($name, $price)
+							  {
+								$this->name = $name;
+								$this->price = $price;
+							  }
+							}
+							
+							
+							// Solution.php
+							<?php
+
+							namespace Solution;
+
+							use Shop\Cart;
+							use Shop\Item;
+
+							function addToCart(Cart $cart, Item $item)
+							{
+							  $cart->items[] = $item;
+							}
+
+							function getCount(Cart $cart)
+							{
+							  return count($cart->items);
+							}
+
+							function getTotal(Cart $cart)
+							{
+							  $result = 0;
+							  foreach ($cart->items as $item) {
+								  $result += $item->price;
+							  }
+
+								return $result;
+							}
+							
+							
+							
+							
+						// Контрольное решение
+							// Cat.php
+							class Cart
+							{
+							  public $items = [];
+							}
+							
+							// Solution.php
+							// BEGIN
+							$cart->items[] = $item;
+							// END
+							
+							
+							  // BEGIN
+							  return count($cart->items);
+							  // END
+							
+							
+							  // BEGIN
+							  return array_reduce($cart->items, function ($sum, $item) {
+								return $sum + $item->price;
+							  }, 0);
+							  // END
+
+
+
+
+	

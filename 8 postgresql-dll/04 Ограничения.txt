@@ -1,0 +1,93 @@
+
+	В БД как и в ЯП имеется спец значение NULL
+	
+	NULL появляется когда вы делаете вставку в таблицу записей и не указываете какое-то поле, 
+	 если не будет ограничений, то там будет NULL (обозначает, что значение не установлено).
+	 
+	Когда поведение является нежелательным, то нужно использовать  Constraints (Ограничения)  
+	 которые вы ставите на столбец или группу столбцов.
+	 
+		NOT NULL   	// значение в столбце нельзя будет пропустить (нельзя задать NULL)
+		
+		UNIQUE		// Поле становится уникальным и в него нельзя вставить два одинак значения
+					// один раз можно вставить NULL 
+					// UNIQUE  необычайно полезен и если поле должно иметь уникальные неповторяющиеся значения, то ставим данный Contraints обязательно
+					
+		PRIMARY KEY		// Технически это комбинация UNIQUE NOT NULL, но важно что на таблице PRIMARY KEY  может быть только один
+	
+	
+					CREATE TABLE products (
+						product_no integer PRIMARY KEY,				// Это поле будет идентификатором 
+						name character varying UNIQUE NOT NULL,		// Можем комбинировать Ограничения 
+						description text,
+						count integer,		// 
+						price numeric NOT NULL,		// Значение этого столбца нельзя пропустить (нельзя задать NULL)
+						created_at timestamp.
+						UNIQUE(name, count)			// Дописав в конце, мы сделали комбинацию этих 2 полей уникальными (а внутри самих полей могут данные повторяться)
+					);
+	
+	
+	
+	
+ССЫЛКИ
+	http://postgresql.ru.net/manual/ddl-constraints.html
+	https://www.postgresql.org/docs/9.4/static/ddl-constraints.html
+	http://postgresql.ru.net/node/4
+	
+	
+	
+	
+ТЕСТЫ
+	Если у колонки есть ограничения NOT NULL и UNIQUE, то
+		в него нельзя записать NULL.
+		
+	В таблице есть такие записи:
+	+--------------+---------------+------------------+
+	|   name       |      shift    |      order       |
+	+--------------+---------------+------------------+
+	|   Ivan       |    42         |     11           |
+	|   Petr       |    42         |     11           |
+	|   Alex       |    43         |     12           |
+	+--------------+---------------+------------------+
+	Какое из ограничений нарушено?
+		UNIQUE (shift, order)	
+		
+	Можно ли комбинировать ограничения NOT NULL и UNIQUE для одной колонки?
+		Да	
+		
+		
+		
+ЗАДАНИЕ
+	solution.sql
+	Выполните в psql запрос, который создает таблицу cars с полями id (primary key), 
+	 name (unique, not null), price (без констрейнов) и created_at (not null). 
+	 Типы столбцов нужно выбрать самостоятельно.
+	Напишите запрос в файл solution.sql.
+		
+					// Мое решение
+					CREATE TABLE cars (
+						id integer PRIMARY KEY,
+						name text UNIQUE NOT NULL,
+						price numeric,
+						created_at timestamp NOT NULL
+					);
+
+					
+					
+					// Контрольное решение
+					CREATE TABLE cars (
+						id integer PRIMARY KEY,
+						name character varying UNIQUE NOT NULL,
+						price numeric,
+						created_at timestamp NOT NULL
+					);
+					
+					
+					
+		
+		
+		
+		
+		
+	
+	

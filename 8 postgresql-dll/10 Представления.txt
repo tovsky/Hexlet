@@ -1,0 +1,75 @@
+
+	Большинство БД имеют фичу вью
+					create view product2 as select * from products; 		// Создали вью с именем  product2 которая выбирате все значения из  таблицы  products.
+					\d														// увидим, что появилась сущность с типом   view  с именем  products2 
+					
+					select * from product2;								// делаем выборку из вью product2. 
+																		// запрос к вью идет как к обычной таблице.
+			
+	На самом деле вью физически не существует это всего лишь запись в таблице. 
+	При команде select * from product2;   произойдет подстановка и осуществится вложенный запрос.
+	В момент парсинга запроса произойдет раскрытие.
+	Фактически мы проименовали запрос.
+	
+	По ресурсам запросы ко вью тяжелее, чем к обычным таблицам.
+	
+	Вью бывают временные, материализованные.
+	
+					DROP VIEW product2;					// Удаление вью
+					
+	В общем случае вью редактировать нельзя 
+	Вью используется просто для удобства выборок.
+	
+	
+ССЫЛКИ
+	https://www.postgresql.org/docs/9.4/static/sql-createview.html
+	http://postgresql.ru.net/manual/tutorial-views.html
+	https://ru.wikipedia.org/wiki/%D0%9F%D1%80%D0%B5%D0%B4%D1%81%D1%82%D0%B0%D0%B2%D0%BB%D0%B5%D0%BD%D0%B8%D0%B5_(%D0%B1%D0%B0%D0%B7%D1%8B_%D0%B4%D0%B0%D0%BD%D0%BD%D1%8B%D1%85)
+	https://habrahabr.ru/post/47031/\
+	
+	https://postgrespro.ru/docs/postgrespro/9.6/sql-createsequence
+	
+	
+ТЕСТЫ
+	В каких случаях могут быть полезны представления (views)?
+		часто нужно получать данные c помощью сложного запроса
+		часто нужно получать только часть большой таблицы
+		часто нужно получать данные из агрегации нескольких таблиц
+
+	Дан запрос: select * from machines;
+	machines это
+		невозможно ответить.
+		
+	Что происходит при удалении view с помощью drop?
+		с таблицами ничего не происходит, удаляется только сам view как абстрактное представление
+
+	Выберите утверждения, которые являются истиной
+		конкретные возможности view зависят от реализации в БД
+		view в первую очередь используется для удобства выборок (получения данных)
+
+
+ЗАДАНИЕ
+	solution.sql
+	Выполните в psql создание новой view с назавнием cars_without_price. Вью должна быть основана 
+	 на выборке из таблицы cars и должна содержать все поля этой таблицы за исключением price;
+	Запишите запрос в solution.sql
+	
+								// мое решение совпадает с контрольным
+								DROP VIEW IF EXISTS cars_without_price;
+								DROP TABLE IF EXISTS cars;
+
+								CREATE TABLE cars (
+									id integer PRIMARY KEY,
+									name character varying UNIQUE NOT NULL,
+									price numeric
+								);
+
+								INSERT INTO cars VALUES (1, 'nissan', 1.12);
+								
+								-- BEGIN
+								CREATE VIEW cars_without_price AS select id, name FROM cars;
+								-- END
+									
+									
+
+
