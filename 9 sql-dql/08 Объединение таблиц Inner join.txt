@@ -1,0 +1,67 @@
+
+	Надо рассматривать таблицы как множества
+	Для простоты называют левое и правое множество.
+	
+	Пересечение множеств - элементы и там там. 
+	в термине SQL  это  iner join. и мы ищем совпадение по какомуто полю
+		можем указывать  join   это равносильно  iner join 
+					
+					select * from courses join categories on categories.id = category_id;		
+								// здесь пересечение двух таблиц courses и categories. 
+								// и мы явно указываем categories.id  что id из таблицы categories
+								
+								
+	
+					select categories.d as category_id, courses.id as course_id from courses join categories on categories.id = category_id;
+					
+	Название таблиц могут быть очень большими и тогда мы можем задавать псевдоним таблицы для использования в выборке.
+	
+					select cs.id as category_id, c.id as course_id from courses c join categories cs on cs.id = category_id;
+					
+					
+ССЫЛКИ
+	http://sql-joins.leopard.in.ua/
+	https://ru.wikipedia.org/wiki/Join_(SQL)
+	
+	
+	
+ТЕСТЫ 
+	По умолчанию под JOIN подразумевается
+		inner join
+		
+	Если в множестве А есть записи "1", "2, "3" и "4", 
+	а в множестве B есть записи "3", "5", "7" и "9", то какие записи будут в пересечении "A inner join B"?
+		"3"	
+		
+	Дан запрос:
+	select * from cars join makers on makers.id = maker_id;
+	Почему здесь явно указан makers.id (а не просто id)?
+		скорее всего колонка 'id' есть в обоих таблицах, поэтому нужно явно указать из какой таблицы брать значение
+		
+	Можно ли использовать сортировку данных, полученных при объединении с помощью JOIN?
+		да
+		
+		
+ЗАДАНИЕ
+	Выполните в psql запрос который выбирает из таблиц goods и categories две записи состоящие из 
+	 названия товаров (name) и имени категории (as category_name), у которых price больше 2 и 
+	 товары отсортированы по имени в обратном порядке. Выберите не более двух записей;
+	Запишите запрос в файл solution.sql;
+		
+						// Мое решение
+							select g.name as name, c.name as category_name 
+								from goods as g join categories as c 
+								on g.category_id = c.id 
+								where g.price > 2 
+								order by g.name desc limit 2;
+
+	
+						// Решение контрольное
+							-- BEGIN
+							SELECT goods.name, categories.name AS category_name
+								FROM goods INNER JOIN categories ON goods.category_id = categories.id
+								WHERE price > 2
+								ORDER BY name DESC
+								LIMIT 2;
+							-- END						
+	

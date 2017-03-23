@@ -1,0 +1,72 @@
+
+	При выводе данных из таблицы не гарантируется порядок вывода, нужен  order by
+	
+					select * from products order by product_no; 		// По умолчанию способ сортировки прямой  ASC
+					select * from products order by product_no ASC; 	// ASC говорит о прямом способе сортировки (по возрастанию)
+					
+					select * from products order by product_no DESC; 	// DESC сортировка по уменьшению
+					
+	
+	Значение NULL  и сортировка 
+					select * from products order by name;			// Будет сортировано по алфавиту, а вот значение NULL будет в самом конце (это в PostgreSQL)
+					
+					select * from products order by name DESC null last; 	// null last  Указавает на то, что  значения  null Всегда будут в конце сортировки
+					
+	Сортирвка по нескольким полям
+					select * from products order by price, name;		// Сортировка по  price,  а затем по  name 
+				
+					
+					
+ССЫЛКИ
+	https://www.postgresql.org/docs/9.4/static/queries-order.html
+	http://postgresql.ru.net/manual/queries-order.html
+	
+	
+ТЕСТЫ
+	Какой порядок используется по-умолчанию при использовании order by?
+		ASC (в порядке увеличения)
+			
+	Как в PostgreSQL принято относиться к значениям NULL?
+		как самым большим (идут в конце при сортировке по возрастанию)
+		
+	Выберите все истинные утверждения
+		мы можем управлять тем, как PostgreSQL сортируют NULL-значения
+		при сортировке с помощью "order by" можно управлять направлением сортировки
+		
+	Как по-умолчанию отсортированы записи при использовании select (если не используется order by) согласно стандарту SQL?
+		зависит от реализации БД, но по стандарту — никак
+		
+		ыул
+ЗАДАНИЕ
+	Выполните в psql запрос который выбирает из таблицы goods все названия товаров из категории cars 
+	 отсортированных по уменьшению цены.
+	Запишите запрос в файл solution.sql;
+							// Мое решение совпадает с контрольным 
+							-- BEGIN
+							SELECT name
+								FROM goods
+								WHERE category = 'cars'
+								ORDER BY price DESC;
+							-- END
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+
+
+
+

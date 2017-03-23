@@ -1,0 +1,112 @@
+
+	left jonin  не просто пересечение таблиц, а полность данные первой таблицы, дополненные
+	 данными из второй. Здесь уже важен порядок таблиц.
+	 
+	 
+						select * from courses left join categories on category_id = categories.id;
+										// Здесь к таблице courses   добавили данные из таблицы  categories  .
+										
+						
+	Для left join существует противоположность  right join  (для всей таблицы справа), 
+	 но в реальности его никто не использует. Таблицу ставят влево и применяют  left join.
+	 
+	 
+	Бывает, что нам нужно узнать для каких данных из таблицы А у нас отсутсвуют связи в  таблице Б.
+	 Это тоже  left join  с добавлением   where   .
+						
+						select * from courses left join categories on category_id = categories.id where categories.id is null;
+										// Произойдет выборка левой таблицы для которой нет соответствия в правой.
+										
+										
+									
+ССЫЛКИ
+	https://www.postgresql.org/docs/9.4/static/tutorial-join.html
+	http://postgresql.ru.net/manual/tutorial-join.html
+	https://ru.wikipedia.org/wiki/Join_(SQL)
+	http://sql-joins.leopard.in.ua/
+	
+
+ТЕСТЫ
+	Если в множестве А есть записи "1", "2, "3" и "4", а в множестве B есть записи "3", "5", "7" и "9", 
+	 то какие записи будут в пересечении "A left join B"?
+		"1", "2, "3" и "4"
+	
+	В каком из видов JOIN'а имеет значение порядок указания таблиц?
+		в left join
+		
+		
+		
+ЗАДАНИЕ
+	Выполните в psql запрос который выбирает из таблицы goods все названия товаров 
+	 для которых не существует категории в таблице categories.
+		
+				
+		nobody=> select * from goods;
+		 id | category_id |  name  | price
+		----+-------------+--------+-------
+		  1 |           1 | bmw    |  2.10
+		  2 |           9 | kia    | 10.02
+		  3 |           1 | nissan |   0.9
+		  4 |           2 | eggs   |  2.13
+		  5 |           2 | milk   |  1.02
+		  6 |             | butter |   2.2
+		(6 rows)
+
+		
+		nobody=> select * from categories;
+		 id |   name
+		----+-----------
+		  1 | cars
+		  2 | products
+		  3 | computers
+		(3 rows)
+				
+		
+		nobody=> select * from goods left join categories on goods.category_id = categories.id;
+		 id | category_id |  name  | price | id |   name
+		----+-------------+--------+-------+----+----------
+		  1 |           1 | bmw    |  2.10 |  1 | cars
+		  2 |           9 | kia    | 10.02 |    |
+		  3 |           1 | nissan |   0.9 |  1 | cars
+		  4 |           2 | eggs   |  2.13 |  2 | products
+		  5 |           2 | milk   |  1.02 |  2 | products
+		  6 |             | butter |   2.2 |    |
+		(6 rows)	
+		
+		
+		select * from goods left join categories on goods.category_id = categories.id where categories.id is null;
+		
+		 id | category_id |  name  | price | id | name
+		----+-------------+--------+-------+----+------
+		  2 |           9 | kia    | 10.02 |    |
+		  6 |             | butter |   2.2 |    |
+		(2 rows)
+				
+		
+							// Мое решение
+							-- BEGIN (write your solution here)
+							select goods.name 
+								from goods left join categories on goods.category_id = categories.id 
+							    where categories.id is null;
+							-- END
+							
+				  name
+				--------
+				 kia
+				 butter
+				(2 rows)			
+							
+							
+							// Контрольное решение
+							-- BEGIN
+							SELECT goods.name
+								FROM goods LEFT JOIN categories ON goods.category_id = categories.id
+								WHERE categories.id IS NULL
+							-- END
+		
+		
+		
+		
+		
+		
+		

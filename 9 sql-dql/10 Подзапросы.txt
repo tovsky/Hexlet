@@ -1,0 +1,91 @@
+
+	Часто приходится делать выборки из одной таблицы по условию в другой таблице или таблицах.
+	 и   left join  здесь не единственное решение. 
+	 Можно использовать подзапросы. И зачастую их использование желаннее.
+	 
+	 
+								select * from courses where category_id in (select id from categories where id < 3);
+								
+								
+								
+								select * from (select id, category_id from courses where id > 2) AS cat;
+								
+	В целом, одна из польз подзапросов в том, что можно разделить один сложный запрос на несколько простых. Декомпозиция и все такое. ) 
+	 Обычно это сильно облегчает анализ кода, и как следствие его разработку и последующую поддержку. Если не перестараться, конечно. 							
+									 
+	 
+	 
+ССЫЛКИ
+	https://www.postgresql.org/docs/9.4/static/functions-subquery.html
+	http://postgresql.ru.net/docs/sql_kg/3-3-2.html
+
+
+
+ТЕСТЫ
+	Подзапросы можно использовать и с where, и с from.
+		Да, правильно
+		
+	При использовании подзапроса с from необходимо
+		присваивать подзапросу алиас (alias)
+
+
+ЗАДАНИЕ
+	Выполните в psql запрос который выбирает из таблицы goods все названия товаров, которые находятся в 
+	 опубликованных категориях (state имеет значение published);
+	Запишите запрос в файл solution.sql;
+
+
+				nobody=> select * from goods;
+			 id | category_id |  name  | price
+			----+-------------+--------+-------
+			  1 |           1 | bmw    |  2.10
+			  2 |             | kia    | 10.02
+			  3 |           1 | nissan |   0.9
+			  4 |           2 | eggs   |  2.13
+			  5 |           2 | milk   |  1.02
+			  6 |             | butter |   2.2
+			(6 rows)
+				
+	
+				nobody=> select * from categories;
+			 id |   name    |    state
+			----+-----------+-------------
+			  1 | cars      | published
+			  2 | products  | unpublished
+			  3 | computers | published
+			(3 rows)
+	
+					// Мое решение
+					select goods.name from goods where category_id in (select id from categories where state = 'published');
+	
+	
+					// Контрольное решение
+					-- BEGIN
+					SELECT name
+						FROM goods
+						WHERE category_id in (select id from categories where state = 'published')
+					-- END
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+
+
+
+	
+	
+	

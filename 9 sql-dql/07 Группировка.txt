@@ -1,0 +1,74 @@
+
+	group by
+	Могут возникать вопросы какая средняя стоимость товаров в категории
+	 или сколько всего товаров в каждой категории. 
+	 
+					select category, count(id) from products group by category;
+						
+	group by category  - база внутри делает группировку, а далее к ним можно использовать
+	 агрегирующие функции например count ()
+	 count сработает для каждой группы в отдельности.
+	 
+	 
+					select category, count(id), avg(price) from products group by category;		// Здесь добавлена еще средняя стоимость 
+	 
+	Групировать можно по разным признакам ( и работать в более узких группах) 
+					select category, name, count(id), avg(price) from products group by category, name;
+					
+					
+	Можем получать минимальное и максимальное значение в группе
+					select category, name, max(id), min(price) from products group by category, name;
+					
+					
+	Порой требуется еще дополнитеьная фильтрация. where  здесь не подойдет.
+	 для group by  используется  having 
+					select category, name, count(id), avg(price) from products group by category, name having count(id) > 1; 	// Отфильтрует где количество > 1.
+					
+	Можем для фильтрации делать логические условия				
+					select category, name, count(id), avg(price) from products group by category, name having count(id) > 1 AND avg(price); 	
+					
+					
+ССЫЛКИ
+	https://www.postgresql.org/docs/9.4/static/functions-aggregate.html
+	http://postgresql.ru.net/manual/tutorial-agg.html
+	
+	
+ТЕСТЫ
+	Дан запрос:
+	select *, count (id) from products group by price;
+	Укажите на ошибку в этом запросе.
+		'select *' недопустим, нужно выбирать конкретную колонку
+	
+	Дан запрос:
+	select category, count (id), name from cars group by category;
+	Укажите на ошибку в этом запросе.
+		'name' должен быть указан в группировке или использовать агрегацию.
+		
+	count, max, avg это примеры
+		агрегатных функций	
+		
+	В чем отличие where от having?
+		'where' применяется к выборке до группировки, а 'having' — после	
+		
+		
+ЗАДАНИЕ
+	Выполните в psql запрос который выбирает из таблицы goods названия категорий и количество товаров 
+	 в этой категории. Выбираться должны только те группы у которых больше одного товара.
+	Запишите запрос в файл solution.sql.
+							// Мое решение
+							select category, count(id) from goods group by category having count(id) > 1;
+							
+							
+							
+							
+							// Контрольное решение
+								-- BEGIN
+								SELECT category, COUNT(*) FROM goods GROUP BY category HAVING COUNT(*) > 1
+								-- END
+		
+	
+	
+	
+	
+					
+					
