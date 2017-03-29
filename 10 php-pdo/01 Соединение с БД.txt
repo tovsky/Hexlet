@@ -1,0 +1,156 @@
+
+	Для работы с БД PHP  предоставляет  библиотеку PDOю
+	Для работы с разным бекэндом предоставлюятся различные драйверы.
+	 Не все они из коробки, некоторые надо устанавливать. Например SQlite  уже включен сразу.
+	 
+	Общая библиотека для работы с БД, хороша тем, что ко всем БД унифицированные запросы, через библиотеку.
+	 Раньше в РНР для каждой БД была своя библиотека. С различными интерфейсами.
+	 
+		
+		Создаем подключение к БД. (создаем инстанс объекта класса PDO).
+							/* $dsn = "mysql:host=$host;dbname=$db;charset=$charset";  */
+							$pdo = new \PDO('sqlite::memory', null, null, $opt);
+													// первый параметр это dsn (data source name) в нашем примере  sqlite::memory 
+													// второй имя пользователя
+													// третий пароль к БД
+													// четвертый и последующий это параметры для точной настройки 
+		По умолчанию PDO проглатывает ошибки, поэтому 4 параметром передаем настройку ошибок, чтобы их перехватыватьи обрабатывать.
+							$opt = array(
+								PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION
+							);
+		Запрос	->exec  для кода, который ничего не возвращает
+							$pdo->exec("create table users (id integer, name string)");
+													// создание таблицы в БД
+							$pdo->exec("insert into users values (3, 'adel')");
+							$pdo->exec("insert into users values (7, 'ada')");
+													// Вносим значения в созданную таблицу. Обычный SQL !
+		Запрос ->query возвращает подготовленный запрос у которого имеется метод  ->fetchAll()
+							$data = $pdo->query("select * from users")->fetchAll();
+		Выводим полученные данные.
+							print_r($data);
+							
+		По умолчанию PDO возвращает интересную вещь к записи в строке можно обращаться и по номеру и по названию поля
+		
+		
+ТЕСТЫ
+	Чем отличается в pdo работа с разными базами?
+		Один набор классов для всех баз данных.
+		
+	Что такое dsn?
+		Формат описывающий параметры для подключения
+
+
+ЗАДАНИЕ
+	Реализуйте интерфейс App\DDLManagerInterface в классе App\DDLManager
+
+	Пример использования:
+	$dsn = 'sqlite::memory:';
+	$ddl = new DDLManager($dsn);
+
+	$ddl->createTable('users', [
+		'id' => 'integer',
+		'name' => 'string'
+	]);
+	
+	Получившийся запрос в базу:
+
+	CREATE TABLE users (
+		id integer,
+		name string
+	);
+
+								// Мое решение
+									// Файл DDLManagerInterface.php
+										<?php
+
+										namespace App;
+
+										interface DDLManagerInterface
+										{
+											public function __construct($dsn, $user = null, $pass = null);
+
+											public function createTable($table, array $params);
+										}
+										
+									
+									// Файл  DDLManager.php
+										<?php
+
+										namespace App;
+
+										class DDLManager implements DDLManagerInterface
+										{
+											private $pdo;
+
+											// BEGIN (write your solution here)
+											public function __construct($dsn, $user = null, $pass = null)
+											{
+												$this->pdo = new \PDO($dsn, $user, $pass);
+											}
+											
+											public function createTable($table, array $params)
+											{
+												$str = "";
+												
+												foreach ($params as $key => $value) {
+													$str = $str . $key . " " . $value . ", ";
+												}
+												
+												$str=substr($str,0,strlen($str)-2);
+												
+												$this->pdo->exec("CREATE TABLE $table ($str)");
+											}
+											// END
+
+											public function getConnection()
+											{
+												return $this->pdo;
+											}
+										}
+
+	
+	
+	
+	
+	
+	
+								// Контрольное решение  Решение учителя отлично от моего!
+									    // BEGIN
+										public function __construct($dsn, $user = null, $pass = null)
+										{
+											$options = [\PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION];
+											$this->pdo = new \PDO($dsn, $user, $pass, $options);
+										}
+
+										public function createTable($table, array $params)
+										{
+											$sqlParts = [];
+											$sqlParts[] = "CREATE TABLE {$table} (";
+
+											$fieldParts = array_map(function ($key, $value) {
+												return "{$key} {$value}";
+											}, array_keys($params), $params);
+											$sqlParts[] = implode(",\n", $fieldParts);
+
+											$sqlParts[] = ");";
+
+											$sql = implode("\n", $sqlParts);
+
+											return $this->pdo->exec($sql);
+										}
+										// END
+
+
+
+										
+
+
+
+
+
+
+
+
+
+		
+							

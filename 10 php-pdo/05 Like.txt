@@ -1,0 +1,255 @@
+
+	В PDO Like напрямую не работает.
+	 Приходится готовить значения заранее.
+							$name = 'a';
+							$value = "$name%";   	// Здесь подставили  % в конец, но разумеется можно и в начале 
+							// $value = "%$name";
+	Далее работаем в обычном режиме
+							$stm = $pdo->prepare("SELECT * FROM users WHERE name LIKE ?");
+							$stm->execute([$value]);
+							$data = $stm->fetchAll(\PDO::FETCH_UNIQUE);
+							
+							print_r($data);
+							
+							
+	Также если % будет встречаться непосредственно в самом $name, то он не экранируется, и 
+	 встречаясь в самом LIKE работает как положено (ищем слово Ав%уст). 
+	 А если % это просто символ, то нужно озаботиться об его экранировании.
+	 
+	
+	
+ТЕСТЫ
+	Почему не сработает использование % в prepare?
+		Знак `%` будет отделен от строки кавычками
+		
+		
+		
+ЗАДАНИЕ
+	file: Solution.php
+	Реализуйте функцию like, которая принимает на вход pdo и массив. Строит запрос по данным 
+	 из массива, выполняет его и возвращает данные в формате PDO::FETCH_COLUMN. Запрос должен 
+	 возвращать id из таблицы users. У массива структура следующая: 1) ключ - это название поля; 
+	 2) значение - это часть запроса, которую нужно использовать в like выражении. Лайки из этого 
+	 массива нужно соединять с помощью OR. Если массив пустой, то запрос должен выполнять 
+	 следующий sql: select id from users.
+
+	Пример:
+
+	$pdo->exec("create table users (id integer, first_name string, email string)");
+	$pdo->exec("insert into users values (1, 'john', 'john@gmail.com')");
+	$pdo->exec("insert into users values (3, 'adel', 'adel@yahoo.org')");
+
+	$params = ['email' => '%gmail%', 'first_name' => 'ad%'];
+
+	[1, 3] == like($pdo, $params); // select id from users where email LIKE ? OR first_name LIKE ?
+		
+									// Файл Solution.php
+										<?php
+
+										namespace App\Solution;
+
+										function like($pdo, array $params)
+										{
+											// BEGIN (write your solution here)
+											
+											// END
+										}
+
+	
+									// Файл SolutionTest.php
+										<?php
+
+										namespace App\Tests;
+
+										use PHPUnit\Framework\TestCase;
+
+										use function App\Solution\like;
+
+										class SolutionTest extends TestCase
+										{
+											private $pdo;
+
+											public function setUp()
+											{
+												$pdo = new \PDO('sqlite::memory:');
+												$pdo->exec("create table users (id integer, first_name string, email string)");
+
+												$data = [
+													[1, 'john', 'john@gmail.com'],
+													[3, 'adel', 'adel@yahoo.org'],
+													[8, 'Mike', 'mike@bing.com'],
+													[9, 'ada', 'ada@mydomain.com']
+												];
+												$stmt = $pdo->prepare("insert into users values (?, ?, ?)");
+												foreach ($data as $value) {
+													$stmt->execute($value);
+												}
+												$this->pdo = $pdo;
+											}
+
+											/**
+											 * @dataProvider additionProvider
+											 */
+											public function testLike($expected, $params)
+											{
+												$result = like($this->pdo, $params);
+
+												$this->assertEquals($expected, $result);
+											}
+
+											public function additionProvider()
+											{
+												return [
+													[['1', '3', '8', '9'], []],
+													[['3', '9'], ['first_name' => 'ad%']],
+													[['1', '8', '9'], ['email' => '%com']],
+													[['1', '3'], ['email' => '%gmail%', 'first_name' => 'ade%']],
+												];
+											}
+										}
+
+	
+	
+	
+									// Решение учителя
+										// BEGIN
+										$likeParts = array_reduce(array_keys($params), function ($acc, $item) {
+											$acc[] = "$item LIKE ?";
+											return $acc;
+										}, []);
+										$sqlParts = [];
+										$sqlParts[] = "select id from users";
+										if (!empty($likeParts)) {
+											$sqlParts[] = "where";
+											$sqlParts[] = implode(" OR ", $likeParts);
+										}
+										$sql = implode(" ", $sqlParts);
+										$stmt = $pdo->prepare($sql);
+										$stmt->execute(array_values($params));
+
+										return $stmt->fetchAll(\PDO::FETCH_COLUMN);
+										// END
+	
+	
+	
+	
+									// Мое неработающее
+										function like($pdo, array $params)
+										{
+											// BEGIN (write your solution here)
+											if (count($params) == 0) {
+												$stmt = $pdo->query("SELECT id FROM users;");
+												return $stmt->fetchAll(\PDO::FETCH_COLUMN);
+											} elseif (count($params) == 1) {
+												$str = "";
+												foreach ($params as $key => $value) {
+													$str = "{$key} LIKE {$value}";
+												}  
+												
+												//$stmt = $pdo->query("SELECT id FROM users WHERE first_name = 'ada' OR first_name = 'adel';");
+												$stmt = $pdo->query("SELECT id FROM users WHERE " . $str);
+												
+												return $stmt->fetchAll(\PDO::FETCH_COLUMN);
+											}
+											
+											/*
+											$sqlStart = "SELECT id FROM users WHERE ";
+											
+											$sqlEnd = implode(" OR ", array_map(function ($key, $value) {
+												return "$key LIKE $value";
+											}), array_keys($params), $params);
+											
+											$stmt = $pdo->query($sqlStart . $sqlEnd);
+											return $stmt->fetchAll(\PDO::FETCH_COLUMN);  */
+											// END
+										}
+	
+	
+	
+									// Вот интересное решение человека
+										<?php
+
+										namespace App\Solution;
+
+										function like($pdo, array $params)
+										{
+											// BEGIN (write your solution here)
+											$sql = "SELECT id FROM users";
+
+											$where = [];
+											foreach ($params as $field => $value) {
+												$where[] = "$field LIKE ?";
+											}
+
+											if ($where) {
+												$sql .= ' WHERE '. implode(' OR ', $where);
+											}
+
+											$stmt = $pdo->prepare($sql);
+											$stmt->execute(array_values($params));
+
+											return $stmt->fetchAll(\PDO::FETCH_COLUMN);
+											// END
+										}
+	
+		
+									// Вот еще решение человека
+										<?php
+
+										namespace App\Solution;
+
+										function like($pdo, array $params)
+										{
+											// BEGIN (write your solution here)
+											$sql = "SELECT id FROM users ";
+											if(empty($params)) {
+												return $pdo->query($sql)->fetchAll(\PDO::FETCH_COLUMN);
+											}
+											$values = [];
+											$mapFunc = function ($value, $key) use (&$values) {
+												$values[] = $value;
+												return $key .' LIKE ?';
+											};
+											$params = implode(' OR ', array_map($mapFunc, array_values($params), array_keys($params)));
+
+											$stmt = $pdo->prepare($sql . ' WHERE ' . $params);
+											$stmt->execute($values);
+
+											return $stmt->fetchAll(\PDO::FETCH_COLUMN);
+											// END
+										}
+										
+									
+									// Вот еще решение
+										<?php
+
+										namespace App\Solution;
+
+										function like($pdo, array $params)
+										{
+											// BEGIN (write your solution here)
+											$queryStr = 'SELECT id FROM users';
+											if ($params) {
+												$queryStr .= ' WHERE ';
+												foreach ($params as $key => $value) {
+													$queryStr .= $key . ' LIKE ? OR ';
+												}
+												$queryStr = substr($queryStr, 0, strlen($queryStr) - 4);
+											}
+
+											$stmt = $pdo->prepare($queryStr);
+											$stmt->execute(array_values($params));
+											return $stmt->fetchAll(\PDO::FETCH_COLUMN);
+											// END
+										}
+										
+										
+										
+								// Еще решения здесь 
+										https://ru.hexlet.io/code_reviews?q%5Bexercise_id_eq%5D=337
+										
+										
+										
+										
+										
+		

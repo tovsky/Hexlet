@@ -1,0 +1,216 @@
+
+	После выполнения запроса в БД мы получаем объект, он называется PDOStatement
+	
+			
+			
+			
+		PDOStatement В тот момент, когда мы делаем запрос представляет из себя вначале подготовленный запрос,
+		 после того, как мы начинаем делать  fetch  из него, то он производит выполнение.
+		И унего есть несколько режимов работы.
+		
+		Нужно знать понятие курсор. Когда вы делаете запрос в БД, то она может сразу вернуть вам все данные, 
+		 а может возвращать почуть-чуть. В зависимости от технологии БД, в некоторых БД создаются временные 
+		 таблицы данных, из которых то почуть-чуть и подгружают результаты.
+		Люди, пользуясь курсорами думают, что они экономят память, но на самом деле это не так.
+		
+							<?php
+							
+							namespace Theory;
+							
+							$opt = array (
+								\PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,		// Режим работы с ошибками (по умолчанию игнорируются, мы выставляем на отлавливание)
+								\PDO::ATTR_DEFAULT_FETCH_MODE => \PDO::FETCH_ASSOC		// Задается дефолтный способ извлечения из БД
+							); 
+							
+							$pdo = new \PDO('sqlite::memory:', null, null, $opt);	// Создаем соединение с БД
+							$pdo->exec("create table users (id integer, name string)");		// Создаем таблицу в БД
+							
+							$pdo->exec("insert into users values (1, 'john')");
+							$pdo->exec("insert into users values (3, 'adel')");		// Создаем записи в таблицу
+							
+							
+							$stmt = $pdo->query("select * from users");				// Подготовленный стейтмент далее его можно выполнять
+							
+							$stmet->fetchAll();									// Возвращются сразу все данные. Причем идет ключ значение и его дублирование с индексом.
+							$stmet->fetchAll(\PDO::FETCH_ASSOC);				// Чаще пользуются этим способом. fetchAll получает константу (которая является на самом деле числом), которая определяет его режим работы.
+																				// эта константа указывает, как представить эти данные. FETCH_ASSOC убирает числовые индексы, оставляя только  key value  пары.
+																				// Это очень удобно, поэтому зачастую сразу прописываю в опции, которые определяют как будет соединение $opt.
+																				
+																				
+		Когда мы работаем с fetch мы работаем с курсором, данные еще находятся в базе.
+		 Мы можем с ними работать по очереди.
+							while ($row = $stmt->fetch() {
+								print_r($row);						// Работаем с записями. (например выводим на печать)
+							}
+		Кроме while можем использовать foreach 
+							foreach ($stmt as $value) {
+								print_r($value);
+							}
+		
+		Существует огромное количестов способов извлечения.
+							// PDO::FETCH_COLUMN, PDO::FETCH_KEY_PAIR, PDO::FETCH_UNIQ		// Разные режимы работы
+							
+		Иногда полезно использовать различные агрегируюющие функции прям в запросе.
+							$stmt = $pdo->query("select MAX(id) from users");			//
+							$stmt->fetchColumn();										// Этот метод вытащит макс число
+							
+							
+							
+ТЕСТЫ
+	Чем отличается способ выборки значений из базы по умолчанию, от fetch_assoc режима?
+		режим по умолчанию выдает данные одновременно в двух форматах, но в рамках одного массива.
+
+	В каких случаях удобен fetchColumn?
+		Если в выборке только одно значение (обычно при применении агрегирующих функций).
+
+
+ВОПРОСЫ
+	Alexander Pashchenko
+		И почему в учительской реализации функция count сама делает запрос? По смыслу задания 
+		 вроде как count должен возвращать количество строк в текущем запросе, а не делать новый.
+	Роман ЛахтадырPRO
+		В реальных проектах count совершает отдельный запрос в базу данных, если выборка еще небыла 
+		 совершена. Дело в том, что выбортка может быть очень большой (миллионы строк) и в этом случае 
+		 загружать всю выборку крайне неэффективно. Иногда нужно просто получить количество строк, 
+		 не загружая эти строки.
+		К примеру, есть такая библиотека - FluentPDO. Представляет собой конструктор SQL запросов. 
+		 В ней для получения count создается клон запроса и в качестве выбираемых столбцов 
+		 устанавливается COUNT(*), который возвращает количество строк, затронутых запросом.
+
+
+
+		
+		
+ЗАДАНИЕ
+	Query — класс, который является абстракцией поверх sql. Его главное достоинство 
+	 это возможность строить динамические запросы без склеивания строк.
+
+	Пример использования:
+
+	<?php
+	$query = new Query($this->pdo, 'users');
+	$query = $query->where('from', 'github');
+	$query = $query->select('id', 'name');
+
+	$query->count() == sizeof($query->all());
+
+	$coll = $query->map(function ($row) {
+		return $row['id'] . '-' . $row['name'];
+	});
+	print_r($coll); // ['id1-name1', 'id2-name2', ...]
+	
+	src/Query.php
+	Реализуйте метод count в соответствии с примером выше.
+	Реализуйте метод map в соответствии с примером выше. // Как я полнял этот метод на вход принимает функцию, в соответствии с которой обрабатывают вывод данных.
+
+
+
+							// Мое решение. Файл Query.php 
+								<?php
+
+								namespace App;
+
+								class Query
+								{
+									private $pdo;
+									private $table;
+									private $data = [
+										'select' => '*',
+										'where' => []
+									];
+
+									public function __construct($pdo, $table, $data = null)
+									{
+										$this->pdo = $pdo;
+										$this->table = $table;
+										if ($data) {
+											$this->data = $data;
+										}
+									}
+
+									public function count()
+									{
+										// BEGIN (write your solution here)
+										return sizeof($this->all());
+										// END
+									}
+
+									public function map($func)
+									{
+										// BEGIN (write your solution here)
+										return array_map($func, $this->all());
+										 // END
+									}
+
+									public function select(...$arguments)
+									{
+										$select = implode(', ', $arguments);
+										return $this->getClone(['select' => $select]);
+									}
+
+									public function where($key, $value)
+									{
+										$data = ['where' => array_merge($this->data['where'], [$key => $value])];
+										return $this->getClone($data);
+									}
+
+									public function all()
+									{
+										return $this->pdo->query($this->toSql())->fetchAll();
+									}
+
+									public function toSql()
+									{
+										$sqlParts = [];
+										$sqlParts[] = "SELECT {$this->data['select']} FROM {$this->table}";
+										if ($this->data['where']) {
+											$where = $this->buildWhere();
+											$sqlParts[] = "WHERE $where";
+										}
+
+										return implode(' ', $sqlParts);
+									}
+
+									private function buildWhere()
+									{
+										return implode(' AND ', array_map(function ($key, $value) {
+											$quotedValue = $this->pdo->quote($value);
+											return "$key = $quotedValue";
+										}, array_keys($this->data['where']), $this->data['where']));
+									}
+
+									private function getClone($data)
+									{
+										$mergedData = array_merge($this->data, $data);
+										return new self($this->pdo, $this->table, $mergedData);
+									}
+								}
+
+								
+								
+								
+							// Контрольное решение	
+									public function count()
+									{
+										// BEGIN
+										$query = $this->select('COUNT(*)');
+										$stmt = $this->pdo->query($query->toSql());
+										return $stmt->fetchColumn();
+										// END
+									}
+
+									public function map($func)
+									{
+										// BEGIN
+										$stmt = $this->pdo->query($this->toSql());
+										array_map($func, $stmt->fetchAll());
+										// END
+									}								
+
+
+
+
+
+
+
+

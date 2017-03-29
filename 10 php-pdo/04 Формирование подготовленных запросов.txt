@@ -1,0 +1,307 @@
+
+	Еще один способ выполнени запросов с помощью PDO, это prepare statement.
+		Вначале используется функция  prepare, которая подготавливает запросов
+		а затем функция execute в которую подставляются уже данные для этого запроса.
+		
+	Механизм подготовленного запроса это механизм базы данных.
+	 С помощью prepare запрос формируется не целиком, в те места где должны быть конкртеные значения
+	  подставлюятся плейсхолдера (заполнители). напрмер знак вопроса ? .
+	 prepare делает запрос на сервер БД, но в БД он не выполняется с точки зрения выборки, а делается подготовка.
+	  Подготовка запроса, включает в себя в формировании плана запроса.
+	 prepare позволяет одни раз подготовить запрос, сформировать план запроса, а потом execute по этому плану работает.
+	 
+	Также prepare statement  делает экранирование.
+	При методе execute Все данные квотятся и это удобно, если вы работаете напрямую.
+	 Если Вы работаете не напрямую, то скорее всего будет использоваться quote, потому что 
+	  количество параметров нефиксировано и скорее всего они будут билдиться динамически.
+	А вот работая напрямую prepare statement  очень удобен.
+	
+	Бывает, что БД не поддерживает механизм prepare statement, но класс PDO универсальный механизм (можно поменять БД
+	 и код будет работать), и в таких ситуациях PDO эмулирует работу с prepare statement.
+	  При prepare запрос отстается на сервере, при  execute  делается локальная подстановка и отсылается на сервер.
+	
+	При исполльзованиии prepare statement через  PDO  всегда будет предсказуемый результат, а также бесплатно квотирование.
+							
+							$pdo = [	\PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,
+										\PDO::ATTR_DEFAULT_FETCH_MODE => \PDO::FETCH_ASSOC	
+							];
+							
+							$pdo = new \PDO('sqlite::memory', null, null, $opt);
+							$pdo->exec("create table users (id integer, name string, role string)");
+							
+							$data = [
+								[1, 'john', 'member'],
+								[2, 'mike', 'admin'],
+								[3, 'adel', 'member'],
+							];
+							$stmt = $pdo->prepare("insert into users values (?, ?, ?)");
+							foreach ($data as $value) {
+								$stmt->execute($value);
+							}
+							
+							$stmt = $pdo->prepare('SELECT name FROM users WHERE role = ? AND name != ?');
+							$stmt->execute(['member', '']);
+							
+							print_r($stmt->fetchAll());		// Выведет Джон и Адель.
+							
+							
+	Иногда удобно использовать плейсхолдеры не ввиде вопросов, а используя символьные имена.
+							// Таблица данных таже, что в первом примере.
+								
+							$stmt = $pdo->prepare('SELECT name FROM users WHERE role = :role);	// Символьный плейсхолдер 
+							$stmt->bindValue(':role', 'member', \PDO::PARAM_STR); 		// плейсхолдер затем значение и третий необязательный параметр тип 
+																						// bindValue вызывается столько сколько плейсхолдеров.
+							$stmt->execute();											// Метод execute для выполнения запроса. Уже без параметров.
+							
+							print_r($stmt->fetchAll());							// Тоже выведет Джон и Адель как и в первом примере.
+							
+							
+ТЕСТЫ
+	Какие преимущества дает работа с prepared statement?
+		При многократном вызове такой способ работает быстрее из-за кеширования плана запроса
+		Автоматическое квотирование данных
+							
+	Что происходит в том случае если база не поддерживает prepared statement?
+		PDO будет работать в режиме эмуляции						
+							
+							
+							
+ЗАДАНИЕ
+	UserMapper это класс отвечающий за сохранение объектов класса User в базе вместе с зависимостями. 
+	 В нашем примере User может содержать фотографии (класс Photo).
+
+	Структура таблиц описана в файле TestUserMapper.php.
+
+	Пример:
+
+	$user = new User();
+	$user->addPhoto('family', '/path/to/photo/family');
+	$user->addPhoto('party', '/path/to/photo/party');
+	$user->addPhoto('friends', '/path/to/photo/friends');
+
+	$mapper = new UserMapper($pdo);
+	$mapper->save($user);
+	file: UserMapper.php
+	Реализуйте функцию save в классе UserMapper. В этом задании достаточно реализовать 
+	 логику сохранения (только вставку) фотографий пользователя.
+								
+								
+							// Мое решение. Также много решений было, которые не прошли.
+							
+								// Файл UserMapperTest.php
+								<?php
+
+								namespace App\Tests;
+
+								use PHPUnit\Framework\TestCase;
+
+								use App\User;
+								use App\UserMapper;
+
+								class UserMapperTest extends TestCase
+								{
+									private $pdo;
+									private $mapper;
+
+									public function setUp()
+									{
+										$opt = array(
+											\PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,
+										);
+										$pdo = new \PDO('sqlite::memory:', null, null, $opt);
+
+										$pdo->exec("create table users (
+											id integer primary key autoincrement,
+											name string not null)");
+
+										$pdo->exec("create table user_photos (
+											id integer primary key autoincrement,
+											user_id integer not null,
+											name string not null,
+											filepath string not null)");
+
+										$this->mapper = new UserMapper($pdo);
+										$this->pdo = $pdo;
+									}
+
+									public function testFetchReducer()
+									{
+										$user = new User('Mark');
+										$user->addPhoto('family', '/path/to/photo/family');
+										$user->addPhoto('party', '/path/to/photo/party');
+										$user->addPhoto('friends', '/path/to/photo/friends');
+
+										$this->mapper->save($user);
+
+										$stmt = $this->pdo->query("SELECT COUNT(*) FROM user_photos");
+										$this->assertEquals(3, $stmt->fetchColumn());
+									}
+								}
+
+							
+							
+								// Файл Photo.php
+									<?php
+
+									namespace App;
+
+									class Photo
+									{
+										private $user;
+										private $name;
+										private $filepath;
+
+										public function __construct($user, $name, $filepath)
+										{
+											$this->user = $user;
+											$this->name = $name;
+											$this->filepath = $filepath;
+										}
+
+										public function getName()
+										{
+											return $this->name;
+										}
+
+										public function getFilepath()
+										{
+											return $this->filepath;
+										}
+									}
+
+																	
+								// Файл User.php
+									<?php
+
+									namespace App;
+
+									class User
+									{
+										private $photos;
+										private $id;
+
+										public function __construct($name)
+										{
+											$this->name = $name;
+										}
+
+										public function getId()
+										{
+											return $this->id;
+										}
+
+										public function getName()
+										{
+											return $this->name;
+										}
+
+										public function setId($id)
+										{
+											$this->id = $id;
+										}
+
+										public function addPhoto($name, $filepath)
+										{
+											$photo = new Photo($this, $name, $filepath);
+											$this->photos[] = $photo;
+										}
+
+										public function getPhotos()
+										{
+											return $this->photos;
+										}
+									}
+
+								
+								// Файл UserMapper.php 
+									<?php
+
+									namespace App;
+
+									class UserMapper
+									{
+										private $pdo;
+
+										public function __construct(\PDO $pdo)
+										{
+											$this->pdo = $pdo;
+										}
+										public function save(User $user)
+										{
+											$stmtUser = $this->pdo->prepare("INSERT INTO users (name) VALUES (?)");
+											$stmtUser->execute([$user->getName()]);
+											$user->setId($this->pdo->lastInsertId());
+
+											// BEGIN (write your solution here)
+											$stmtUserPhotos = $this->pdo->prepare("INSERT INTO user_photos (user_id, name, filepath) VALUES (?, ?, ?)");
+									  
+											foreach ($user->getPhotos() as $value) {
+												$tmp = [];
+												$tmp[] = $user->getId();
+												$tmp[] = $value->getName();
+												$tmp[] = $value->getFilepath();
+												$stmtUserPhotos->execute($tmp);
+												unset($tmp);
+											}
+											// END
+										}
+									}
+											
+											
+						// Поэтому решению задал вопроса
+        // BEGIN (write your solution here)
+        $stmtUserPhotos = $this->pdo->prepare("INSERT INTO user_photos (user_id, name, filepath)
+                                                VALUES (:user_id, :name, :path)");
+        foreach ($user->getPhotos() as $value) {
+            $stmtUserPhotos->bindValue(':user_id', $user->getId(), \PDO::PARAM_INT);
+            $stmtUserPhotos->bindValue(':name', $value->getName(), \PDO::PARAM_STR);
+            $stmtUserPhotos->bindValue(':path', $value->getFilepath(), \PDO::PARAM_STR);
+            $stmtUserPhotos->execute();
+        }
+
+        // END
+			
+
+			
+			
+					// Это решение не работало, потому что массивом надо было передавать как в решении учителя.
+        // BEGIN (write your solution here)
+                $stmtUserPhotos = $this->pdo->prepare("INSERT INTO user_photos (user_id, name, filepath)
+                                                VALUES (?, ?, ?)");
+        foreach ($user->getPhotos() as $value) {
+            $stmtUserPhotos->execute($user->getId(), $value->getName(), $value->getFilepath());			
+        }
+
+        // END
+		
+		
+
+		
+
+
+							
+							
+							
+							
+							
+							// Контрольное решение 
+								        // BEGIN
+										$stmt = $this->pdo->prepare("INSERT INTO user_photos (user_id, name, filepath) VALUES (?, ?, ?)");
+
+										foreach ($user->getPhotos() as $photo) {
+											$stmt->execute([$user->getId(), $photo->getName(), $photo->getFilepath()]);
+										}
+										// END
+							
+							
+							
+							
+							
+							
+							
+							
+							
+							
+							
+
+							

@@ -11,8 +11,25 @@
 	
 	bool array_key_exists ( mixed $key , array $array ) 	// Проверяет, присутствует ли в массиве указанный ключ или индекс
 	
+	array array_keys ( array $array)      // возвращает числовые и строковые ключи, содержащиеся в массиве array.
+
+	array array_map ( callable $callback , array $array1 [, array $... ] )    	// 	возвращает массив, содержащий элементы array1 после их обработки callback-функцией. Количество параметров, передаваемых callback-функции, должно совпадать с количеством массивов, переданным функции array_map(). Функция может быть анонимной.
+	
+	
 	
 Файлы
 	bool file_exists ( string $filename )   // Проверяет наличие указанного файла или каталога. filename Путь к файлу или каталогу. 
 
+	
+Строки
+	string implode ( string $glue , array $pieces )   // implode — Объединяет элементы массива в строку с разделителем $glue
+	
+	array explode ( string $delimiter , string $string [, int $limit = PHP_INT_MAX ] )		// Возвращает массив строк, полученных разбиением строки string с использованием delimiter в качестве разделителя.
+	
+	string substr ( string $string , int $start [, int $length ] ); 				// Возвращает подстроку строки string, начинающейся с start символа по счету и длиной length символов. Можно обрезать N первых или последних символов
+	
+	
+	
+	
+	
 	

@@ -1,0 +1,110 @@
+
+	Главный принцип: Не доверять внешним данным! 
+	Возможны SQL инъекции
+	Как правильно делать запросы? Использовать квотирование ($pdo->quote )
+							$values = [3, 'm\'ark --']; 		//Вот это значение сломает обычный запросы
+							$data = implode(', ', array_map(function ($item) use ($pdo) {
+								return $pdo->quote($item);
+							}, $values));
+							$sql = "insert into users values ($data)";
+							$pdo->exec($sql);
+		
+	quote хорош еще тем, что позволяет строить поверх sql абстракции, в которых заранее количество подстановок 
+	 неизвестно, т.е. на основе ее мы можем строить генераторы, которые позволяют генерировать динамические sql запросы
+	 и выполнять их к базе.
+	 
+	 
+	
+		
+							
+ТЕСТЫ
+	В каких случаях помогает квотирование?
+		при попытках провести sql-инъекцию
+		в случае если вставляемые данные содержат внутри себя специальные символы.
+		
+		
+ЗАДАНИЕ
+	Query класс который предоставляет абстракцию поверх sql. Его главное достоинство это 
+	 возможность строить динамические запросы без склеивания строк.
+
+	Пример использования:
+
+	$query = new Query($pdo, 'users');
+	$query = $query->where('from', 'github');
+	$query = $query->where('id', '3')->where('age', 21);
+
+	// SELECT * FROM users WHERE from = 'github' AND id = 3 AND age = 21;
+	$query->toSql();
+
+	$query->all();
+	Query.php
+	Реализуйте метод toSql.
+	
+	
+						// Мое решение файл  Query.php
+							<?php
+
+							namespace App;
+
+							class Query
+							{
+								private $pdo;
+								private $where = [];
+
+								public function __construct($pdo, $table, $where = [])
+								{
+									$this->pdo = $pdo;
+									$this->table = $table;
+									$this->where = $where;
+								}
+
+								public function where($key, $value)
+								{
+									$where = [$key => $value];
+									return $this->getClone($where);
+								}
+
+								public function all()
+								{
+									return $this->pdo->query($this->toSql())->fetchAll();
+								}
+
+								public function toSql()
+								{
+									// BEGIN (write your solution here)
+									$sqlParts = "SELECT * FROM $this->table WHERE ";
+									$fieldParts = implode(" AND ", array_map(function ($key, $value) {
+										return "{$key} = '{$value}'";
+									}, array_keys($this->where), $this->where));
+
+									return $sqlParts . $fieldParts . ";";
+									// END
+								}
+
+								private function getClone($where)
+								{
+									$mergedData = array_merge($this->where, $where);
+									return new self($this->pdo, $this->table, $mergedData);
+								}
+							}
+	
+							
+							
+					// Контрольное решение 
+						        // BEGIN
+								$sqlParts = [];
+								$sqlParts[] = "SELECT * FROM {$this->table}";
+								if ($this->where) {
+									$where = implode(' AND ', array_map(function ($key, $value) {
+										$quotedValue = $this->pdo->quote($value);
+										return "$key = $quotedValue";
+									}, array_keys($this->where), $this->where));
+									$sqlParts[] = "WHERE $where";
+								}
+
+								return implode(' ', $sqlParts);
+								// END
+							
+							
+							
+							
