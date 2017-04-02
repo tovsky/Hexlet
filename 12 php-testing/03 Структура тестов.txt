@@ -1,0 +1,287 @@
+
+	Тестирование разбивается по файлам так:  если у вас есть класс, то у вас под него должен быть отдельный тестовый файл.
+	
+	Есть 2 класса и 2 файла под них Leaf.php и   Node.php 
+	
+							// Файл  Leaf.php 
+								<?php
+								
+								namespace Theory
+								
+								class Leaf
+								{
+									private $value;
+									
+									public function __construct($value = null)
+									{
+										$this->value = $value;
+									}
+									
+									public function getValue()
+									{
+										return $this->value;
+									}
+								}
+
+								
+								
+	Под него тестовый файл в папке  tests
+							
+							// Файл   LeafTest.php
+								<?php
+								
+								namespace Theory;
+								
+								require_once "Leaf.php";
+								
+								class TestLeaf extends \PHPUnit_Framevork_TestCase
+								{
+									public function testGetValue()
+									{
+										$value = 100;
+										$leaf = new Leaf($value);
+										$this->assertEquals($value, $leaf->getValue());
+									}
+								}
+								
+								
+								
+	Файл         			Node.php
+								<?php
+								
+								namespace Theory;
+								
+								require_once "Leaf.php";
+								
+								class Node
+								{
+									private $children = [];
+									
+									public function addChild($child)
+									{
+										$this->children[] = $child;
+									}
+									
+									public function getChildren() 
+									{
+										return $this->children;
+									}
+									
+									public function removeChildren()
+									{
+										return $this->children = [];
+									}
+								}
+								
+								
+	Тестировать нужно в сторону увеличения зависимостей.
+	Сначала тестировать методы менее зависимые от остальных, а потом уже те методы, которые на них полагаются.
+							// Файл   NodeTest.php 
+								<?php 
+								
+								namespace Theory;
+								
+								require_once "Node.php";
+								
+								class TestNode extends \PHPUnit_Framevork_TestCase
+								{
+									public function testGetChildren()				// метод getChildren завязан на addChild, но его мы не сможем проверить без  getChildren (получается совместный тест)
+									{
+										$tree = new Node();
+										$leaf = new Leaf();
+										$node = new Node();
+										
+										$children = $tree->getChildren();			// Часто вначале проверяют предусловие, проверяем что начальный счетчик верен
+										$this->assertCount(0, $children);			// Здесь что метод вернет пустой массив.
+										
+										$tree->addChild($leaf);						// Добавляем ноду
+										$children = $tree->getChildren();			// Проверяем количество потомков
+										$this->assertCount(1, $children);			// Ожидаем, что потомок теперь 1 и что сопадает.
+										$this->assertContains($leaf, $children);	// Проверяем, что вот этот leaf  содержится в children. 
+										
+										$tree->addChild($node);						// Добавляем ноду
+										$children = $tree->getChildren();			// Проверяем количество потомков
+										$this->assertCount(2, $children);			// Ожидаем, что потомков теперь стало 2 и что наши ожидания совпадают с результатом работы функции.
+										$this->assertContains($leaf, $children);	
+										$this->assertContains($node, $children);	// Проверка что элемент $node  присутствует как объект в коллекции  $children
+									}
+									
+									public function testRemoveChildren()
+									{
+										$tree = new Node();
+										$leaf = new Leaf();
+										
+										$tree->addChild($leaf);						// Мы добавляем чайлда, но уже не делаем проверку, что работает, так как проверили выше 
+										$tree->removeChildren();					// Вызываем тестриуемый метод (который удаляет чайлда)
+										$children = $tree->getChildren();			// Количество наследников
+										$this->assertEmpty($);						// Проверяем, что коллекция пустая
+									}
+								}
+								
+								
+								
+								
+								
+ТЕСТЫ
+	Выберите верные утверждения
+		Разные виды `assert` функций нужны для более удобного автоматического вывода сообщений об ошибках
+		В одном тестовом методе желательно тестировать только одну функцию (в юнит тестировании)
+								
+	Как выполнить запуск только одного тестового класса?
+		phpunit <путь до файла>							
+								
+								
+		
+ЗАДАНИЕ
+	QueryBuilder это специальный класс для конструирования sql запросов. Подобная функциональность 
+	 есть практически во всех ORM. Пример использования:
+
+		QueryBuilder::from('members')->toSql();
+		// SELECT * FROM members
+
+		QueryBuilder::from('members')->where('id', 12)->toSql();
+		// SELECT * FROM members WHERE id = '12'
+
+		QueryBuilder::from('photos')->select('author', 'id')
+			->where('views_count', null)->where('state', 'archived')->toSql();
+		// SELECT author, id FROM photos WHERE views_count IS NULL AND state = 'archived'
+	
+	file: TestQueryBuilder.php
+	Реализуйте тесты для QueryBuilder основываясь на примере выше.
+								
+								
+								// Файл query_builder.right.php  (это класс на который мы будем писать проверку)
+									<?php
+
+									namespace App;
+
+									class QueryBuilder
+									{
+										private $selectPart = '*';
+										private $tablePart;
+										private $whereParts = [];
+
+										public static function from($table)
+										{
+											$builder = new QueryBuilder($table);
+											return $builder;
+										}
+
+										public function __construct($table)
+										{
+											$this->tablePart = $table;
+										}
+
+										public function select()
+										{
+											$this->selectPart = implode(", ", func_get_args());
+											return $this;
+										}
+
+										public function where($key, $value)
+										{
+											$this->whereParts[$key] = $value;
+											return $this;
+										}
+
+										public function toSql()
+										{
+											$sqlParts = [];
+											$sqlParts[] = "SELECT {$this->selectPart} FROM {$this->tablePart}";
+
+											if ($this->whereParts) {
+												$whereParts = array_map(function ($key, $value) {
+													if (is_null($value)) {
+														return "$key IS NULL";
+													} else {
+														return "$key = '$value'";
+													}
+												}, array_keys($this->whereParts), $this->whereParts);
+
+												$wheres = implode(' AND ', $whereParts);
+												$sqlParts[] = "WHERE $wheres";
+											}
+
+											return implode(' ', $sqlParts);
+										}
+									}
+
+								
+								
+								// Мое решение файл TestQueryBuilder.php
+									<?php
+
+									namespace App;
+
+									class TestQueryBuilder extends \PHPUnit_Framework_TestCase
+									{
+										public function testDefault()
+										{
+											// BEGIN (write your solution here)
+											$default = QueryBuilder::from('users')->toSql();
+											$this->assertEquals('SELECT * FROM users', $default);
+											// END
+										}
+
+										public function testSelect()
+										{
+											// BEGIN (write your solution here)
+											 $default = QueryBuilder::from('users')->select('author', 'id')->toSql();
+											 $this->assertEquals('SELECT author, id FROM users', $default);
+											// END
+										}
+
+										// BEGIN (write your solution here)
+										public function testWhere()
+										{
+											$default = QueryBuilder::from('products')->select('author, id')
+												->where('views_count', null)->toSql();
+											$this->assertEquals('SELECT author, id FROM products WHERE views_count IS NULL', $default);
+											
+											$default2 = QueryBuilder::from('photos')->select('author', 'id')
+												->where('views_count', null)->where('state', 'archived')->toSql();
+											$this->assertEquals("SELECT author, id FROM photos WHERE views_count IS NULL AND state = 'archived'", $default2);
+										}
+										// END
+									}
+								
+								
+								
+								
+								// Контрольное решение	
+									        // BEGIN
+											$builder = QueryBuilder::from('users');
+											$expected = 'SELECT * FROM users';
+											$this->assertEquals($expected, $builder->toSql());
+											// END
+											
+											// BEGIN
+											$builder = QueryBuilder::from('photos')->select('age', 'name');
+											$expected = 'SELECT age, name FROM photos';
+											$this->assertEquals($expected, $builder->toSql());
+											// END
+								
+											 // BEGIN
+											public function testWhere()
+											{
+												$builder = QueryBuilder::from('users')
+													->where('age', '18')
+													->where('source', 'facebook');
+												$expected = "SELECT * FROM users WHERE age = '18' AND source = 'facebook'";
+												$this->assertEquals($expected, $builder->toSql());
+											}
+
+											public function testWhereWithNull()
+											{
+												$builder = QueryBuilder::from('users')
+													->where('email', null);
+												$expected = 'SELECT * FROM users WHERE email IS NULL';
+												$this->assertEquals($expected, $builder->toSql());
+											}
+											// END
+								
+								
+								
+								
+								
+								

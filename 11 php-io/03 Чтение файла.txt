@@ -1,0 +1,112 @@
+
+	Перед чтением файла требуется убедиться, что он  доступен для чтения (readable).
+					
+					$file = __FILE__;
+										
+					if (file_exists($file) && is_readable($file)) {
+						$lines = file(__FILE__); 						// чтение строк из файла в массив
+						foreach ($lines as $line) {
+							echo $line;									// Выводим строки полученного массива
+						}
+					
+					
+						$content = file_get_contents(__FILE__);			// Возвращает содержимое файла одной строкой
+						echo $content;
+						
+						
+						$handle = fopen($filename, "rb");		// r+   (rb говорит о том что только чтение без модификации)
+						if ($handle) {							// fopen возвращает файловый дескриптор	
+							try {
+								$contents = fread($handle, filesize($filename));		// fread принимает файловый дескриптор и размер сколько прочитать
+							} finally {
+								fclose($handle);						// Закрываем дескриптор
+							}
+						}
+						
+						
+						$handler = fopen($file, "rb");
+						if ($handler) {
+							try {
+								while (!feof($handler)) {				// feof проверяет достиг ли указатель конца файла
+									echo fgets($handler, 1024);			// fgets (дескриптор, длина сколько прочитать) Причем возвращает за раз дину строки. Удобно считывать ПОСТРОЧНО
+								}
+							} finally {
+								fclose($handler)
+							}
+						}
+						
+						
+						$handler = fopen($file, "rb");
+						if ($handler) {
+							try {
+								/* javier argonaut   	pe */
+								/* hirishi sculptor     jp */
+								/* robert  slacker us */
+								/* luigi   florist it */
+								while ($userinfo = fscanf($handler, "%s\t%s\t%s\n")) {		// fscanf  вычитывает содержимое и прогоняет через определенную структуру
+									list($name, $profession, $countrycode) = $userinfo;		
+								}
+							} finally {
+								fclose($handler);
+							}
+						}
+					}
+					
+					
+	Передав в класс SplFileObject файл, мы получим объект, с разными полезными методами.				
+					$file = new SplFileObject("file.txt");
+					
+					while (!$file->eof()) {  			// Если файла не достиг конца
+						echo $file->fgets();
+					}
+					
+					
+					foreach ($file as $lineNumber => $content) {			// За место while  можем сделать через foreach 
+						printf("Line %d: $s", $lineNumber, $content);		
+					}
+					
+					
+					$linesTenToTwentyIterator = new LimitIterator(			// Чтение того же обекта через итератор
+						$file,
+						9,			// start at line 10
+						10  		// iterate 10 lines 
+					);
+					foreach ($linesTenToTwentyIterator as $line) {
+						echo $line;		// outputs line 10 to 20		С 10 по 20 строку
+					}
+					
+					
+					
+					
+ТЕСТЫ
+	Почему, функции читающие файл целиком, нужно использовать с осторожностью?
+		При их использовании может потребляться очень много памяти (зависит от размера файла).
+		
+	Как правильно освобождать файловый дескриптор?
+		Нужно вызвать функцию fclose внутри блока finally, потому что во время работы могут быть 
+		 выброшены исключения
+					
+					
+					
+ЗАДАНИЕ
+	src/App/FileUtils.php
+	Реализуйте функцию grep, принимающую на вход два параметра: подстроку для сопоставления и шаблон 
+	 в формате glob, по которому будет происходить поиск.
+
+	Функция должна вернуть список всех строк файлов, в которых содержится подстрока. Поиск должен 
+	 производиться по всем файлам переданного шаблона.
+
+	Пример:
+
+	sizeof(grep('test', './*')); // 3
+					
+
+					
+					
+					
+					
+					
+					
+					
+					
+					

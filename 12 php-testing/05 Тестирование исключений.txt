@@ -1,0 +1,193 @@
+
+	На данный момент в PHPUnit 2 варианта тестирования исключений
+	
+						<?php
+						
+						namespace App;
+						
+						require_once "Solution.php";
+						
+						class SolutionTest extends \PHPUnit_Framework_TestCase
+						{
+							/**
+							 * @expectedException \InvalidArgumentException
+							 */
+							public function testExceptionUsingAnnotation() 
+							{
+								throw new \InvalidArgumentException('Some Message');
+							}
+							
+							
+							public function testExceptionUsingTry()
+							{
+								try {
+									throw new \InvalidArgumentException('Some message');
+									$this->fail("expected exception");
+								} catch (\InvalidArgumentException $e) {
+								}
+							}
+						}
+						
+						
+						
+						
+	В первом самом простом случае мы просто выбрасываем исключение из функции, используя специальную
+	 аннотацию   expectedException  которое проверяет, что выброшенное исключение будет соответствовать тому,
+	 что будет сюда передано как строчка.
+	Сейчас такой подход не очень часто используется в тестировании современных PHP фреймворков
+	
+		
+	Во втором случае мы используем блок try - catch
+	В блоке catch не обязательно писать  assert, потому что если тестовый метод заканчивается 
+	 успешно (в том смысле, что не один assert  не был вызван и не было исключений), то он считается прошедшим (все ок.)
+	 
+	Обязательно не забыть после выброса исключения вызывать   fail  которая падает с ошибкой, 
+	 здесь мы ожидаем исключения и если его не будет исключения то без fail,  блок просто завершится и мы увидим . что значит успешное прохождение теста.
+	 
+	 
+	 
+	 
+ТЕСТЫ
+	Какими способами можно тестировать исключения в phpunit?
+		Используя try/catch
+		Через аннотации
+			 
+			 
+	Можно ли в одном тестовом методе проверять несколько исключений?
+		Можно только через try/catch, но лучше для каждого исключения делать свой тестовый метод
+			 
+			 
+			 
+			 
+ЗАДАНИЕ
+	ACL (access control list) это механизм проверки доступа определенных ролей к действиям над 
+	 определенными ресурсами.
+
+	Включает понятия:
+		Роль - кто выполняет действие.
+		Ресурс - над чем выполняется действие.
+		Привилегия - какое выполняется действие.
+	Например, администратор может редактировать карточку пользователя. Здесь роль - администратор, 
+	 пользователь - ресурс, редактировать - привилегия.
+
+	Принцип работы системы ACL из этого упражнения:
+
+	$data = [
+		'articles' => [
+			'show' => ['editor', 'manager'],
+			'edit' => ['editor']
+		],
+		'money' => [
+			'create' => ['editor'],
+			'show' => ['editor', 'manager'],
+			'edit' => ['manager'],
+			'remove' => ['manager']
+		]
+	];
+
+	$acl = new Acl($data);
+
+	$acl->check('articles', 'show', 'manager')
+	
+	file: TestSolution.php
+	Напишите тесты на функцию check объекта $acl. Функция принимает на вход ресурс, привилегию и роль. 
+	Принцип работы этой функции:
+		Если не найден ресурс - бросаем исключение Acl\ResourceUndefined.
+		Если не найдена привилегия - бросаем исключение Acl\PrivilegeUndefined.
+		Если доступ запрещен - Acl\AccessDenied.
+			 
+			 
+			 
+									// Мое решение
+										<?php
+
+										namespace App;
+
+										require_once 'implementations/Acl/AccessDenied.php';
+										require_once 'implementations/Acl/ResourceUndefined.php';
+										require_once 'implementations/Acl/PrivilegeUndefined.php';
+
+										class TestSolution extends \PHPUnit_Framework_TestCase
+										{
+											private static $data = [
+												'articles' => [
+													'show' => ['editor', 'manager'],
+													'edit' => ['editor']
+												],
+												'money' => [
+													'create' => ['editor'],
+													'show' => ['editor', 'manager'],
+													'edit' => ['manager'],
+													'remove' => ['manager']
+												]
+											];
+
+											public function testAccessDenied()
+											{
+												$acl = new Acl(static::$data);
+
+												// BEGIN (write your solution here)
+												try {
+													throw $acl->check('articles', 'edit', 'manager');;
+													$this->fail("error");
+												} catch (Acl\AccessDenied $e) {
+												}
+												// END
+											}
+
+											// BEGIN (write your solution here)
+											public function testPrivilegeUndefined()
+											{
+												$acl = new Acl(static::$data);
+												try {
+													throw $acl->check('money', 'editCurency', 'manager');
+													$this->fail();
+												} catch (Acl\PrivilegeUndefined $e) {
+												}
+											}
+											// END
+										}
+										
+										
+										
+										
+									// Контрольное решение
+										// BEGIN
+										try {
+											$acl->check('articles', 'edit', 'manager');
+											$this->fail('expected exception');
+										} catch (Acl\AccessDenied $e) {
+										}
+										// END
+										
+										
+										
+										    // BEGIN
+											public function testResourceUndefined()
+											{
+												$acl = new Acl(static::$data);
+
+												try {
+													$acl->check('undefined resources', 'edit', 'manager');
+													$this->fail('expected exception');
+												} catch (Acl\ResourceUndefined $e) {
+												}
+											}
+
+											public function testPrivilegeUndefined()
+											{
+												$acl = new Acl(static::$data);
+
+												try {
+													$acl->check('articles', 'move', 'manager');
+													$this->fail('expected exception');
+												} catch (Acl\PrivilegeUndefined $e) {
+												}
+											}
+											// END
+			 
+			 
+			 
+			 
+			 
+			 

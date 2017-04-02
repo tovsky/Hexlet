@@ -1,0 +1,187 @@
+
+	Часто при тестировании может возникать ситуация с повоторяющимися однотипными тестами.
+					// Файл SolutionTest.php
+						<?php
+						
+						namespace App;
+						
+						require_once "Solution.php";
+						
+						use function App\Solution\cube;
+						
+						class SolutionTest extends \PHPUnit_Framework_TestCase
+						{
+							public function testCube()
+							{
+								$this->assertEquals(1, cube(1));
+								$this->assertEquals(8, cube(2));
+								$this->assertEquals(24, cube(3));
+								$this->assertEquals(1000, cube(10));
+							}
+						}
+						
+		При таком подходе если ошибка на 2-м тесте, то последующие уже не проводятся.
+		Малоинформативный вывод ошибки
+					// Файл Solution2Test.php
+						`<?php
+						
+						namespace App;
+						
+						require_once "Solution.php";
+						
+						use function App\Solution\cube;
+						
+						class Solution2Test extends \PHPUnit_Framework_TestCase
+						{
+							/**
+							 *	@dataProvider additionProvider
+							 */
+							
+							public function testCubeWithDataSet($expected, $argument)
+							{
+								$this->assertEquals($expected, cube($argument));
+							}
+							
+							public function additionProvider()
+							{
+								return [
+									[1, 1],
+									[8, 2],
+									[27, 3],
+									[-1, -1]
+								];
+							}
+						}
+		
+		
+		// метод testCubeWithDataSet принимает два параметра (если нужно больше), эти 2 параметра передаются 
+		// специальной функцей additionProvider(). Эта функция должна вернуть массив, чьи элементы
+		// являются массивами с передаваемыми аргументами
+		
+		При таком тестировании все проверки обязательно происходят, даже если какой-то тест посередине падает.
+		Также очень информативный вывод ошибки
+	
+
+	
+ТЕСТЫ
+	Сколько аргументов может принимать тестовая функция, ожидающая на вход данные из dataset?
+		Столько, сколько будет описано в функции `dataProvider`
+		
+	Можно ли использовать более одной функции утверждения (assert) в тестовом методе, работающим с dataProvider?
+		Да	
+
+
+		
+ВОПРОСЫ
+	Александр ДPRO
+		Объясните пожалуйста тонкость с объявлением @dataProvider посредством коммента. У меня выскакивала 
+		 ошибка непонятная ошибка пока я не догадался, что у меня в начале комментов стоит /*, а надо /**. 
+		 Это прикол пхп, который надо просто запомнить? Или тут есть некое правило?
+	Kirill MokevninPRO
+		Это определенный стандарт https://en.wikipedia.org/wiki/PHPDoc
+		 Не совсем обычный комментарий. Комментарии оформленные в таком стиле можно анализировать и 
+		  получать внутри программы (за счет механизма под названием рефлексия), а обычные комментарии 
+		  никак не доступны программному коду, для него их не существует.
+
+		
+		
+		
+ЗАДАНИЕ
+	TestSolution.php
+	Напишите тесты на функцию hasEqualOnesCount, которая принимает на вход два числа и возвращает true 
+	 если количество единиц в двоичном представлении у этих чисел совпадает и false если не совпадает.
+		
+		
+		
+							// Файл has_equal_ones_count.right.php  (это функция на которую мы будем писать проверку)		
+								<?php
+
+								namespace App;
+
+								function hasEqualOnesCount($first, $second)
+								{
+									$onesCount = function ($number) {
+										$binary = decbin($number);
+										$bitsArray = str_split(strval($binary));
+										return sizeof(array_filter($bitsArray, function ($bit) {
+											return $bit == "1";
+										}));
+									};
+
+									return $onesCount($first) == $onesCount($second);
+								}
+
+		
+		
+							
+							
+							// Мое решение
+								<?php
+
+								namespace App;
+
+								class TestSolution extends \PHPUnit_Framework_TestCase
+								{
+									// BEGIN (write your solution here)
+									/**
+									 *  @dataProvider additionProvider
+									 */
+									 
+									public function testHasEqualOnesCount($expected, $num1, $num2)
+									{
+										$this->assertEquals($expected, hasEqualOnesCount($num1, $num2));
+									}
+									
+									public function additionProvider()
+									{
+										return [
+											[true, 1, 1],
+											[true, 0, 0],
+											[false, 1, 0],
+											[false, 0, 1],
+											[true, 101, 101],
+											[false, 105, 104],
+											[false, 101, 1003],
+											[true, 100, 7]
+										];
+									}
+									// END
+								}
+		
+
+		
+		
+		
+		
+							// Контрольное решение
+								    // BEGIN
+									/**
+									 * @dataProvider additionProvider
+									 */
+									public function testHasEqualOnesCount($actual, $first, $second)
+									{
+										$this->assertEquals($actual, hasEqualOnesCount($first, $second));
+									}
+
+									public function additionProvider()
+									{
+										return [
+											[true, 1, 1],
+											[false, -1, 1],
+											[false, 5, 2],
+											[true, 5, 3],
+										];
+									}
+									// END
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+						

@@ -1,0 +1,103 @@
+	
+	Рассмотрим функции, отвечающие за манипуляции с файловой системой в PHP.
+		file_exists($path)	- Проверяет сущетсвует ли файл или директория.
+								
+								// Пример для папки
+								if (!file_exists($path)) {			// is_dir($path)
+									mkdir($path, 0755, $recursive);  // 1 пар путь, 2 права (запсаны в 8-ой), 3 рекурсивно или нет создавать
+								}
+								rmdir($path); 						// Особенность, что если дириктория не пустая, то она не удалится
+								
+		is_dir($path)	- Проверка является каталогом?
+		
+								//Пример длая файла.
+								if (!file_exists($path)) {			// is_file($path)
+									touch($path);					// Создание файла
+								}
+								unlink($path);						// Когда на файл не останется ссылок, то он будет удален
+								
+								
+								
+								//  rename($old, $new);		Переименование
+								// copy($old, $new);
+								
+								
+								
+								print_r(glob('/var/tmp*'));			// glob показывает имеющиеся файлы с их абсолютными путями, но без (.. и .)
+								print_r(scandir('var/tmp'));				// здесь будут все файлы и папки без предворяющих директорий.
+								
+	
+	В РНР Встроено большое количество итераторов, в том числе для работы с файловой системой.
+	 Итераторы являются копозебл, их можно оборачивать друг в друга и получать новое поведение.
+								//DirectoryIterator  FilesystemIterator  RecursiveDirectoryIterator  Есть разные итераторы, в примере ниже GlobIterator
+								$iterator = new \ClobIterator('../*');
+								foreach ($iterator as $item) {
+									print_r($item);
+								}
+								
+								
+ТЕСТЫ
+	Какая функция удаляет файл ? 
+		unlink();
+	
+	Какая функция создает файл?
+		touch();
+		
+		
+
+
+ЗАДАНИЕ
+	FileUtils.php
+	Реализуйте функцию rrmdir, удаляющую директорию рекурсивно, то есть вместе со всем своим содержимым.
+
+	Подсказка
+	Одна из возможных реализаций может использовать итераторы.
+	Воспользуйтесь функцией scandir вместо функции glob.
+									// Мое решение 
+										<?php
+
+										namespace App\FileUtils;
+
+										function rrmdir($dir)
+										{
+											// BEGIN (write your solution here)
+										$files = array_diff(scandir($dir), array('.','..'));
+										foreach ($files as $file) {
+										(is_dir("$dir/$file")) ? rrmdir("$dir/$file") : unlink("$dir/$file");
+										}
+										return rmdir($dir);
+											// END
+										}
+
+
+
+									// Контрольное решение
+										// BEGIN
+										$dirIterator = new \RecursiveDirectoryIterator($dir, \FilesystemIterator::SKIP_DOTS);
+										$iterator = new \RecursiveIteratorIterator($dirIterator, \RecursiveIteratorIterator::CHILD_FIRST);
+										foreach ($iterator as $filename => $fileInfo) {
+											if ($fileInfo->isDir()) {
+												rmdir($filename);
+											} else {
+												unlink($filename);
+											}
+										}
+										rmdir($dir);
+										// END
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,117 @@
+
+	Самы простой способ
+				<?php
+				/* functon factorial(); */ 			// Функция еше не реализовали, а внизу уже пишем ожидания
+				
+				assert(6 == fatorial(3));			// Самый простой способ начать писать тесты
+				
+	Нормальный классический подход в РНР. Стандартом дефакто является phpUnit
+		Например есть файл  Solution.php
+						<?php
+						
+						namespace App\Solution;
+						
+						function isOdd($var)		// Функция проверки что число нечетное
+						{
+							return $var % 2 != 0;
+						}
+						
+						
+		Создается каталог tests, в ней хранятся тесты. Создается файл с именем как у файла, 
+		 но в конце Test			файл SolutionTest.php 
+						<?php
+						
+						namespace App;
+						
+						require_once "Solution.php";		
+						
+						class SolutionTest extends \PHPUnit_Framework_TestCase 				// Создается класс с названием как у файла 
+						{
+							public function testIsOdd()									// В классе описываются функция/ии, название нач  с test
+							{
+								$this->assertTrue(Solution\isOdd(1));
+								$this->assertFalse(Solution\isOdd(8));
+							}
+						}
+		 
+	Запуск теста в командной строке    phpunit tests/				
+	// Нужно указывать каталог с тестами или файл.
+	Вначале должен прогрузиться фреймворк, поэтому запуск через phpunit 
+	
+	PHPUnit  произошел  от  JUnit. Все фремворки для тестирования в большинстве ЯП похожи, 
+	и их сейчас называют XUnit фреймворки.
+	
+	Зная PHPUnit по сути знаете все.
+	
+	
+ПРИМЕЧАНИЯ	
+	Основные Утверждения
+	Ниже приведен список наиболее часто используемых утверждений:
+
+	// assertTrue(mixed $value)
+	$this->assertTrue(isEven(6));
+
+	// assertEquals(mixed $expected, mixed $actual)
+	$this->assertEquals(6, factorial(3));
+
+	// assertCount(int $size, array $haystack)
+	$this->assertCount(1, getChildren());
+
+	// assertContains(mixed $needle, Iterator|array $haystack)
+	$this->assertContains('john', getNames());
+	
+
+ТЕСТЫ
+	Чтобы начать тестировать обязательно нужно:
+		Написать функцию `assert` и проверять через нее функции
+	
+	Выберите верное утверждение:
+		Тесты ускоряют скорость разработки (в целом)
+		
+	Когда лучше всего писать тесты?
+		До кода, потому что они помогают сформировать правильные интерфейсы
+	
+	
+	
+ЗАДАНИЕ
+	file: TestSolution.php
+	Напишите тесты на функцию isEven, которая принимает на вход число и 
+	 возвращает true если число четное и false в обратном случае.
+	
+								// Мое решение 
+									<?php
+
+									namespace App;
+
+									class TestSolution extends \PHPUnit_Framework_TestCase
+									{
+										public function testIsEven()
+										{
+											// BEGIN (write your solution here)
+											$this->assertTrue(isEven(8));
+											$this->assertFalse(isEven(1));
+											// END
+										}
+									}
+	
+	
+	
+								// Контрольное решение
+									        // BEGIN
+											$this->assertTrue(isEven(-2));
+											$this->assertFalse(isEven(7));
+											$this->assertTrue(isEven(8));
+											// END
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	

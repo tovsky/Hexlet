@@ -1,0 +1,99 @@
+
+	Запись в файл в РНР не так разнообразна как чтение
+			
+						$file = __DIR__ . DIRECTORY_SEPARATOR . 'temp';
+						$data = "my data\n";
+						
+					// file_put_contents если файла нет, то он его создает.
+					// по умолчанию полностью перезаписывает файл, но можно добавить 
+					// 3-м параметром FILE_APPEND  и тогда будет запись в конец файла
+						file_put_contents($file, $data);
+							
+							
+						if (is_writable($file)) {
+							$handle = fopen($file, "ab");  		// открываем файловый дескриптор с ключами  ab
+							if ($handle) {
+								try {
+									fwrite($handle, $data);		// Записываем в конец файла данные и сдвигает указатель в конец. Похожа на fread.
+									fwrite($handle, $data);
+									/* fflush($handle);  */			// Данная функция осуществляет сброс буферизованных данных в файл, на который указывает handle.
+								} finally {
+									fclose($handle);
+								}
+							}
+						}
+						
+						
+					// Еще один способ
+						$file = new \SplFileObject($file, 'ab');
+						$file->fwrite($sdata);
+						
+						
+						
+						
+ТЕСТЫ
+	К чему приводит повторный вызов fwrite на том же файловом дескрипторе?
+		Данные дописываются
+		
+	Что делает fflush?
+		Вызывает принудительную запись данных из буферов операционной системы на диск
+		
+		
+		
+ЗАДАНИЕ
+	Сериализация — процесс перевода какой-либо структуры данных в последовательность битов. 
+	 Обратной к операции сериализации является операция десериализации (структуризации) — восстановление 
+	 начального состояния структуры данных из битовой последовательности.
+
+	Функция serialize в php генерирует пригодное для хранения представление переменной. 
+	 Это полезно для хранения или передачи значений PHP между скриптами без потери их типа и структуры. 
+	 Для превращения сериализованной строки обратно в PHP-значение существует функция unserialize.
+
+	src/App/Serializer.php
+	Реализуйте функцию dump, которая принимает на вход имя файла и структуру данных. 
+	 После чего она сериализует эту структуру и записывает в файл.
+	Реализуйте функцию load, которая принимает на вход имя файла. После этого она 
+	 читает содержимое файла и проводит десериализацию.
+	Пример:
+
+		Serializer\dump($file, $structure);
+		$data = Serializer\load($file);
+
+		$structure == $data;
+		
+		
+													
+							// Мое решение
+								<?php
+
+								namespace App\Serializer;
+
+								// BEGIN (write your solution here)
+								function dump($file, $structure)
+								{
+									file_put_contents($file, serialize($structure));
+								}
+
+								function load($file) 
+								{
+									return (unserialize(file_get_contents($file)));
+								}
+								// END
+						
+							
+							// Контрольное решение
+								// BEGIN
+								function load($file)
+								{
+									$data = file_get_contents($file);
+									return unserialize($data);
+								}
+
+								function dump($file, $data)
+								{
+									$string = serialize($data);
+									file_put_contents($file, $string);
+								}
+								// END
+		
+		

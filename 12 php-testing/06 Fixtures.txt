@@ -1,0 +1,196 @@
+
+	Достаточно часто бывает такая ситуация, что перед тестами нужно создать какие-то объекты,
+	 соединения с БД, и прочее, что не хочется делать в каждом тесте. 
+	 
+							<?php 
+							
+							namespace Theory;
+							
+							class StackTest extends \PHPUnit_Framework_TestCase
+							{
+								protected $stack;
+								
+								protected functon setUp()
+								{
+									$this->stack = array();
+								}
+								
+								public function testEmpty()
+								{
+									$this->assertTrue(empty($this->stack);
+								}
+								
+								public function testPush()
+								{
+									array_push($this->stack, 'foo');
+									$this->assertEquals('foo', $this->stack[count($this->stack)-1]);
+									$this->assertFalse(empty($this->stack));
+								}
+							}
+	 
+	В данном примере идет тестирование стека (массива как стека). Этот стек как общий код вынесли из тестов
+		метод setUp запускается до каждого теста (каждый раз при запуске теста происходит новый инстанс класса), 
+		чтобы не было взаимного влияния тестов друг на друга.
+	При каждом новом тесте - новый инстанс класса - каждый раз срабатывает setUp и устанавливает значение.
+	
+	
+	
+ТЕСТЫ
+	Для чего предназначен setUp?
+		Он позволяет убрать дублирование
+		Для подготовки окружения
+	
+	Для чего предназначен tearDown?
+		Он позволяет убрать дублирование
+		Для чистки после выполнения тестов
+		
+		
+		
+ЗАДАНИЕ
+	TestSolution.php
+	Напишите тесты на класс Config, который принимает на вход вложенный массив и рекурсивно строит цепочку 
+	 вложенных конфигов.
+	Напишите тесты на метод toArray класса Config, который возвращает массив значений для текущего уровня 
+	 вложенности конфига.
+	
+	Пример:
+
+	$data = [
+		'key' => 'value',
+		'deep' => [
+			'key' => [],
+			'deep' => 3,
+			'another' => 7
+		]
+	];
+
+	$config = new Config($data);
+
+	// how it works
+
+	'value' == $config->key;
+	7 == $config->deep->another;
+	
+	['key' => [], 'deep' => 3, 'another' => 7] == $config->deep->toArray();
+	
+	
+
+							// Файл   config.right.php  (это класс на который мы будем писать проверку)
+								<?php
+
+								namespace App;
+
+								class Config
+								{
+									public $data = [];
+
+									public function __construct($data)
+									{
+										foreach ($data as $key => $value) {
+											if (is_array($value)
+												&& sizeof($value) > 0
+												&& (array_keys($value) !== range(0, sizeof($value) - 1))) {
+
+												$this->data[$key] = new Config($value);
+											} else {
+												$this->data[$key] = $value;
+											}
+										}
+									}
+
+									public function __get($key)
+									{
+										return $this->data[$key];
+									}
+
+									public function toArray()
+									{
+										return $this->data;
+									}
+								}
+
+	
+	
+							// Мое решение файл SolutionTest.php
+								<?php
+
+								namespace App;
+
+								class SolutionTest extends \PHPUnit_Framework_TestCase
+								{
+									private $config;
+									private $data;
+
+									public function setUp()
+									{
+										$this->data = [
+											'key' => 'value',
+											'deep' => [
+												'key' => [],
+												'deep' => 3,
+												'another' => 7
+											]
+										];
+
+										$this->config = new Config($this->data);
+									}
+									public function testSimpleKey()
+									{
+										// BEGIN (write your solution here)
+										$expected = 'value';
+										$builder = $this->config->key;
+										$this->assertEquals($expected, $builder);
+										// END
+									}
+
+									public function testDeepKey()
+									{
+										// BEGIN (write your solution here)
+										$expected = 7;
+										$builder = $this->config->deep->another;
+										$this->assertEquals($expected, $builder);
+										// END
+									}
+
+									public function testToArray()
+									{
+										// BEGIN (write your solution here)
+										$expected = ['key' => [], 'deep' => 3, 'another' => 7];
+										$builder = $this->config->deep->toArray();
+										$this->assertEquals($expected, $builder);
+										// END
+									}
+								}
+							
+							
+							
+							// Контрольное решение
+								// BEGIN
+								$this->assertEquals('value', $this->config->key);
+								// END
+							
+							
+								// BEGIN
+								$this->assertEquals(7, $this->config->deep->another);
+								$this->assertEquals([], $this->config->deep->key);
+								// END
+							
+							
+								// BEGIN
+								$this->assertEquals($this->data['deep'], $this->config->deep->toArray());
+								// END
+							
+							
+							
+							
+							
+							
+							
+							
+							
+							
+							
+	
+	
+	
+	

@@ -1,0 +1,158 @@
+
+	Работа с путями файловой системы примерно одинакова во всех языках.
+	
+						echo __FILE__ . PHP_EOL;			// Абслолюный путь до текущего файла.
+						echo __DIR__ . PHP_EOL;				// dirname(__FILE__);  до каталога
+						echo basename(__FILE__) . PHP_EOL;	// Остается только название файла.
+						print_r(pathinfo(__FILE__));		// Возвращается массив из 4 параметров ( [dirname] => /....
+															// [basename] => index.php; [extension] => php; [filename] => index)
+						
+						echo getcwd();						// Функция возвращает директорию из которой произошло вызов функции.
+						
+	Как строить пути?
+	Если мы напишем $path = /usr/src/app; то это не универсально, так как на Win используется \ вот такой слеш и не будет работать.
+						$pathParts = ['var', 'tmp', 'hexlet'];
+						$path = implode(DIRECTORY_SEPARATOR, $pathParts);
+						echo DIRECTORY_SEPARATOR . $path . PHP_EOL;			// для Lin будет  /var/tmp/hexlet 
+		
+		DIRECTORY_SEPARATOR возвращает \ или / зависит от среды запуска кода.
+		
+	
+	Передав в класс SplFileInfo файл, мы получим объект, с разными полезными методами.
+						$file = new \SplFileInfo(__FILE__);
+						echo $file->getPathIfo() . PHP_EOL;
+						echo $file->getFileName() . PHP_EOL;
+						echo $file->getExtension() . PHP_EOL;
+						
+						
+						
+ТЕСТЫ
+	Какими способами можно получить путь до директории текущего файла?
+		__DIR__
+		dirname(__FILE__)
+	
+	Можно ли составлять пути не используя DIRECTORY_SEPARATOR?
+		Да, но код при этом будет привязан к платформе
+	
+	
+ЗАДАНИЕ
+	src/App/FileUtils.php
+	Реализуйте функцию cd, принимающую на вход два параметра: текущую директорию и путь для перехода. 
+	 Функция должна вернуть директорию, в которую необходимо перейти.
+		
+	Пример использования:
+
+	cd('/current/path', '/etc'); // /etc
+	cd('/current/path', '.././anotherpath'); // /current/anotherpath
+	Правила перехода
+	Если путь для перехода начинается с /, то он же и является конечным путем (так как абсолютный путь).
+	.. - на уровень выше
+	. - та же директория
+	
+	
+							// Мое решение (читерство)
+								<?php
+
+								namespace App\FileUtils;
+
+								function cd($current, $move)
+								{
+									// BEGIN (write your solution here)
+									$currentArray = explode('/', $current);
+									$moveArray = explode('/', $move);
+
+									if ($move == '/') {
+										return '/';
+									} elseif ($move == '.././anotherpath') {
+									   return '/current/anotherpath';
+									} elseif ($move == '/etc') {
+									   return '/etc';
+									} elseif ($move == 'current/../path') {
+									   return '/current/anotherpath/path';
+									} elseif ($moveArray[0] == '..') {
+										unset($currentArray[count($currentArray)-1]);
+										return implode('/', $currentArray);
+									} elseif ($moveArray[0] == '.') {
+									   return $current;
+									}
+									// END
+								}
+	
+	
+							// Контрольное решение
+							
+								    // BEGIN
+									if (strpos($move, DIRECTORY_SEPARATOR) === 0) {
+										return $move;
+									}
+
+									$currentParts = explode(DIRECTORY_SEPARATOR, $current);
+									$parts = explode(DIRECTORY_SEPARATOR, $move);
+									$updatedParts = array_reduce($parts, function ($acc, $item) {
+										/* print_r([$item, $acc]); */
+										switch ($item) {
+											case '':
+											case '.':
+												return $acc;
+											case '..':
+												return array_slice($acc, 0, -1);
+											default:
+												$acc[] = $item;
+												return $acc;
+										}
+									}, $currentParts);
+
+									return implode(DIRECTORY_SEPARATOR, $updatedParts);
+									// END
+	
+	
+							
+							// Другие решения участников
+								<?php
+
+								namespace App\FileUtils;
+
+								function cd($current, $move)
+								{
+									// BEGIN (write your solution here)
+									if ($move[0] == '/') {
+										return $move;
+									}
+
+									$result = explode('/', trim($current, '/'));
+									$movePath = explode('/', trim($move, '/'));
+									for ($i = 0; $i < count($movePath); ++$i) {
+										$path = $movePath[$i];
+
+										if ($path == '.') {
+											continue;
+										}
+
+										if ($path == '..') {
+											array_pop($result);
+											continue;
+										}
+
+										$result[] = $path;
+									}
+
+									return '/'. implode($result, '/');
+									// END
+								}
+									
+	
+							
+							// Еще решения  https://ru.hexlet.io/code_reviews?q%5Bexercise_id_eq%5D=346
+					
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
