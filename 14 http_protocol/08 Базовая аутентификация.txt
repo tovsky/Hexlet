@@ -1,0 +1,57 @@
+
+	У HTTP  есть такая фича, как базовая аутентификация.
+	
+	Когда заходите на станицу, а может и на весь ресурс, где применена базовая аутентификация, 
+	 то браузер вырисовывает поверх окно аутиентифкации (это окно отрисовывает сам браузер со стандартным дизанйом)
+	
+	
+ССЫЛКИ
+	https://en.wikipedia.org/wiki/Basic_access_authentication
+	
+
+ТЕСТЫ
+	Какой код используется для обозначения запрета доступа без аутентификации ("access denied")?
+		401
+		
+	Какое из утверждений является истинным?
+		форму для ввода логина и пароля генерирует сам браузер
+	
+	Возможно ли применить базовую аутентификацию к только одной странице на сайте?
+		да
+		
+	
+
+ЗАДАНИЕ
+	Используя telnet авторизуйтесь на hexlet.local:8080 (расположен на localhost). Параметры 
+	 запроса: глагол get, 
+		страница /admin, 
+		протокол http 1.1, 
+		имя пользователя Aladdin, 
+		пароль open sesame;
+	Запишите ваш request в файл solution;
+	Подсказка
+	Для кодирования логина и пароля используйте следующую команду в терминале: 
+	 printf 'username:password' | base64
+	 
+GET /admin HTTP/1.1
+HOST: hexlet.local
+Authorization: Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==
+
+
+GET /admin HTTP/1.1
+HOST: hexlet.local
+Content-type: application/x-www-form-urlencoded
+Content-Length: 34
+Connection: close
+
+login=Aladdin&password=open sesame
+
+
+
+							// РЕШЕНИЕ
+								// BEGIN
+								GET /admin HTTP/1.1
+								HOST: hexlet.local
+								Authorization: Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==
+								// END
+

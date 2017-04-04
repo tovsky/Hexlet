@@ -1,0 +1,59 @@
+
+	Запрос HTTP состоит из заголовков и опционального тела.
+	
+	В заголовке   Content-Length: 184			// Указывается количество байт
+		Благодаря этому после передачи такого заголовка, двойной перенос на новою строку не приводит 
+		 к завершению передачи данных.
+		 Принимающая сторона будет ждать тело длиной 184 байта.
+		 
+		 
+	Также некоторве сервера так настроены, что могут игнорировать Content-Length:    и закрывать соединение
+		помогает заголовок Conten-Type:
+		
+					
+					POST / HTTP/1.1
+					HOST: hetlex.local
+					Conten-Type: text/plain
+					Content-Length: 28
+					Connection: close
+					
+					login=user&password=12345678
+					
+					
+ССЫЛКИ
+	https://ru.wikipedia.org/wiki/HTTP#.D0.A2.D0.B5.D0.BB.D0.BE_.D1.81.D0.BE.D0.BE.D0.B1.D1.89.D0.B5.D0.BD.D0.B8.D1.8F
+	http://citforum.ru/internet/cgi_tut/rqst.shtml
+	http://citforum.ru/internet/cgi_tut/spns.shtml
+	
+	
+ТЕСТЫ
+	Какое значение имеет поле "content length" в ответе (response) при использовании метода HEAD? (необходимо изучить этот вопрос самостоятельно)
+		такое же, какое было бы у тела сообщения, возвращаемого при использовании GET
+		 
+	Content-length может присутствовать
+		и в запросе, и в ответе	
+		 
+		 
+ЗАДАНИЕ
+	Используя telnet выполните запрос к hexlet.local (расположен на localhost) на порт 8080. 
+	 Параметры запроса: глагол post, страница /upload, протокол http 1.1, тело: my request body. 
+	 Не забудьте установить заголовки необходимые для отправки body;
+	Запишите ваш request в файл solution;
+		
+								telnet localhost 8080
+								// BEGIN
+								POST /upload HTTP/1.1
+								Host: hexlet.local
+								Content-Length: 15
+								Content-Type: text/plain
+
+								my request body
+								// END			
+											
+								
+								
+								
+								
+								
+								
+								

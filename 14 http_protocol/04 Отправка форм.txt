@@ -1,0 +1,66 @@
+
+	При отправке формы мы отпраавляем данные. 
+	 В  HTTP  есть только заголовки и тело.
+	 В зависимости от того,что установлено в Content-Type , будут интерпретироваться данныые при  отправке 
+	 
+	Заходим в telnet   отправляем 
+							POST /login	HTTP/1.1
+							HOST: hexlettesthost.com
+							Content-Type: application/x-www-form-urlencoded
+							Content-Length: 28
+							Connection: close
+							
+							login=user&password=12345678
+							
+							
+	application/x-www-form-urlencoded  вот этому типу соостветсвует    ключ=значение
+	
+	
+	Особенность с кодированием. Все что отправляется на сервер (не важно GET POST)должно быть закодировано. 
+	например символ =  это %3D 
+		
+	
+ССЫЛКИ
+	https://ru.wikipedia.org/wiki/Форма_(HTML)
+	https://developer.mozilla.org/en-US/docs/Learn/HTML/Forms/Sending_and_retrieving_form_data
+	
+	
+ТЕСТЫ
+	В какой части HTTP-запроса находятся данные формы при ее отправке?
+		в теле
+		
+	При отправке формы с помощью, например, GET-запроса, разные части (поля) формы можно разделять таким символом:
+		&
+		
+	Может ли ответ на HTTP-запрос (то есть HTTP response) содержать тело с какой-то информацией?
+		да, конечно!
+		
+		
+		
+ЗАДАНИЕ
+	Выполните авторизацию на сайте hexlet.local (расположен на localhost:8080). 
+	 Для этого отправьте следующие данные формы: username со значением admin, 
+	                                               password со значением secret 
+												    на урл /session/new. 
+	Используйте глагол post и тип application/x-www-form-urlencoded;
+	 Запишите ваш request в файл solution;
+
+
+									// BEGIN
+									POST /session/new HTTP/1.1
+									Host: hexlet.local
+									Content-Type: application/x-www-form-urlencoded
+									Content-Length: 30
+
+									username=admin&password=secret
+									// END
+
+
+
+
+
+
+
+
+
+
