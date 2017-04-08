@@ -1,0 +1,148 @@
+
+	Шаблонизация
+	Цель: Рассмотреть технику отделения программного кода от представления. 
+	 Написать свой собственный шаблонизатор и интегрировать его во фреймворк.
+	 
+	Шаблонизация - это подход при котором мы отделяем програмный код от сборки какого то шаблона (HTML, XML или какой-то другой шаблон).
+	
+	Язык PHP  это единственный ЯП который позволяет смешивать его с HTML.
+	
+	Рассмотрим небольшой шаблон:
+							// Файл    index.phtml  (Здесь описываем HTML со вставками  PHP  кода)
+								<h1>site <?= $site ?></h1>			// быстрый вывод на экран переменной
+								
+								<?php if (!empty($subprojects)) : ?> 		// Здесь немного другой синтаксис    оператор   :   endоператор
+									<ul>
+										<?php foreach ($subprojects as $project) : ?>					// foreach () : .......  endforeach
+											<li><?= $project ?></li>
+										<?php endforeach ?>
+									</ul>
+								<?php endif ?> 
+								
+								
+	Теперь нужно из этого подготовленного шаблона сгенерировать законченную строчку
+							// Файл     index.php
+								<?php 
+								
+								namespace Theory;
+								
+								require_once 'Template.php';
+								
+								use function Theory\Template\render;
+								
+								$html = render('index.phtml', [				// Здесь используется функция rander из подключенного файла
+									'site' => 'hexlet.io',										// Ключ это переменная, значение то, что нужно подставить
+									'subprojects' => ['map.hexlet.io', 'battle.hexlet.io']
+								]);
+								
+								print_r($html);
+						
+						
+							// Файл  Template.php 		(то место где происходит подстановка в шаблонизатор)
+								<? php
+								
+								namespace Theory\Template;
+								
+								function render($template, $variables)		// Шаблонизатор чистая функция. На входе ПУТЬ до шаблона и массив переменных
+								{
+									extract($variables);			// Создает локальные переменные
+									ob_start();						// Буферизация вывода
+									include $template;
+									return ob_get_clean();			// Возвращает данные из буфера и после очищает его
+								}
+								
+								
+ТЕСТЫ
+	Как правильно вывести переменную в шаблоне?
+		<?= $param ?>
+		
+	Выберите верное утверждение
+		Изменять состояние системы в шаблоне считается плохой практикой
+		Шаблон это декларативное описание представления данных
+								
+								
+						
+ЗАДАНИЕ
+	В нашем фреймворке шаблоны лежат в папке resources/views.
+
+	src/App/Template.php
+	Реализуйте функцию render, которая принимает абсолютный путь до шаблона и массив параметров, 
+	 а возвращает готовый html.
+
+	src/App/Renderer.php
+	Реализуйте функцию render в нейсмпейсе App\Renderer. Она принимает на вход относительный путь 
+	 до шаблона и параметры. Эта функция должна вычислять абсолютный путь к шаблону и в
+	 вызывать функцию render шаблонизатора App\Template.
+
+	Пример использования:
+
+	<?php
+
+	use function App\Renderer\render;
+
+	$app = new Application();
+
+	$app->get('/', function () {
+		return render('index');
+	});
+
+	$app->get('/about', function () {
+		return render('about', [
+			'site' => 'hexlet.io',
+			'subprojects' => ['battle.hexlet.io', 'map.hexlet.io']
+		]);
+	});
+
+	$app->run();
+
+
+								// Файл  src/App/Renderer.php
+									// BEGIN
+									namespace App\Renderer;
+
+									function render($filepath, $params = [])
+									{
+										$templatepath = 'resources' . DIRECTORY_SEPARATOR . 'views'. DIRECTORY_SEPARATOR . $filepath . '.phtml';
+										return \App\Template\Render($templatepath, $params);
+									}
+									// END
+
+
+
+								// Файл src/App/Template
+									    // BEGIN
+										extract($variables);
+										ob_start();
+										include $template;
+										return ob_get_clean();
+										// END
+
+
+
+								// Файл   index.php
+									<?php
+
+									namespace App;
+
+									require '/composer/vendor/autoload.php';
+
+									use function App\Renderer\render;
+
+									$app = new Application();
+
+									$app->get('/', function () {
+										return render('index');
+									});
+
+									$app->get('/about', function () {
+										return render('about', ['site' => 'hexlet.io']);
+									});
+
+									$app->run();
+
+
+
+
+
+						
+								

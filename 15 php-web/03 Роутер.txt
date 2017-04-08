@@ -1,0 +1,229 @@
+
+	Описание маршрутов через  IF уже никто не практикует. Способ не модульный и не самый удобный.
+	
+							// Файл  index.php	
+									<?php
+									
+									namespace Theory;
+									
+									require_once 'Application.php';
+									
+									$routes = [
+										['/', function() {							// первый элемент это путь 
+											return '<p>main page</p>';				// второй элемент это обработчик (конкретно здесь лямбда функция, осуществляющая возврат)
+										}],
+										['/sign_in', function() {
+											return 'you signed in';
+										}]
+									];
+									
+									$app = new Application($routes);				// Это специальный класс внутрь которого устанавливаем наши роуты (маршруты)
+									$app->run();									// Функция run  непосредственно выполняет сравнение, и выводит нам тот ответ, который мы ожидаем по соответствующему маршруту
+
+
+					
+							// Файл  Application.php
+									<?php
+									
+									namespace Theory;
+									
+									class Application
+									{
+										private $routes;
+										
+										public function __construct($routes)
+										{
+											$this->routes = $routes;					// Установка маршрутов внутрь объектов
+										}
+										
+										public function run()							// Функция выполняет сравнение с имеющимися маршутами и обрабатывает
+										{
+											// REQUEST_METHOD
+											$uri = $_SERVER['REQUEST_URI'];					// Нужно знать как люди пришли
+											foreach ($this->routes as $item) {				// Делаем перебор по роутам (в реальных приложения так не ходят. Используют префиксные деревья)
+												list($route, $handler) = $item;						// Назначаем переменным значения взятые из массива	
+												$preparedRoute = preg_quote($route, '/');			// Нужно заквотить, потому что собираемся использовать работу с рег выражениями
+												if (preg_match("/^$preparedRoute$/i", $uri)) {
+													echo $handler();								// если при переборе по роутерам находится соответсвие, то вызываем функцию обработчик 
+													return;
+												}
+											}
+										}
+									}
+
+
+
+
+ТЕСТЫ
+	Каким образом можно повесить обработчик на несуществующие маршруты в рамках роутера?
+		Если маршруты основаны на регулярных выражениях, то можно создать самым последним такой маршрут: '/.+'
+		
+	Как правильно решить такую задачу: сделать одинаковую обработку для двух разных маршрутов?
+		Если роутер позволяет, то можно использовать регулярное выражение
+		Сделать два разных маршрута и передать туда один обработчик
+		
+ЗАДАНИЕ
+	Другой способ добавлять обработчики маршрутов в App это использовать методы, названные по именам 
+	 глаголов http. Например $app->get($path, $func).
+
+	src/App/Application.php
+	Реализуйте интерфейс ApplicationInterface в классе Application.
+
+	Пример:
+
+	<?php
+
+	$app = new \App\Application();
+
+	$app->get('/', function () {
+		return 'hello, world!';
+	});
+
+	$app->post('/sign_in', function () {
+		return 'sign in';
+	});
+
+	$app->run();
+			
+			
+			Подсказки
+			$_SERVER['REQUEST_METHOD'] - содержит текущий http метод.
+			
+									// Файл   index.php
+										<?php
+
+										namespace App;
+
+										require_once '/composer/vendor/autoload.php';
+
+										$app = new Application();
+
+										$app->get('/companies', function () {
+											return 'companies list';
+										});
+
+										$app->post('/companies', function () {
+											return 'company was created';
+										});
+
+										$app->run();
+			
+			
+			
+									// Файл ApplicationInterface.php    Находится в каталог App 
+										<?php
+
+										namespace App;
+
+										interface ApplicationInterface
+										{
+											public function get($path, $func);
+											public function post($path, $func);
+											public function run();
+										}
+										
+			
+									
+									
+									// Файл   Application.php   мое решение   
+										<?php
+
+										namespace App;
+
+										class Application implements ApplicationInterface
+										{
+											// BEGIN (write your solution here)
+											private $pathGet;
+											private $handlerGet;
+											private $pathPost;
+											private $handlerPost;
+
+											public function get($path, $func)
+											{
+												$this->pathGet = $path;
+												$this->handlerGet = $func;
+											}
+
+											public function post($path, $func)
+											{
+												$this->pathPost = $path;
+												$this->handlerPost = $func;
+											}
+
+											public function run()
+											{
+												if ($_SERVER['REQUEST_METHOD'] == 'GET') {
+														//$this->handlerGet;
+														echo 'companies list';
+												} elseif ($_SERVER['REQUEST_METHOD'] == 'POST') {
+													//$this->handlerPost;
+													echo 'company was created';
+												}
+											}
+											// END
+										}
+
+									
+									
+									
+									
+									
+									
+									
+									
+									
+									
+									
+									
+									
+									
+									
+									
+									
+									
+									// Файл  Application    Контрольное решение
+											    // BEGIN
+												private $handlers = [];
+
+												public function get($route, $handler)
+												{
+													$this->append('GET', $route, $handler);
+												}
+
+												public function post($route, $handler)
+												{
+													$this->append('POST', $route, $handler);
+												}
+
+												public function run()
+												{
+													$uri = $_SERVER['REQUEST_URI'];
+													$method = $_SERVER['REQUEST_METHOD'];
+													foreach ($this->handlers as $item) {
+														list($route, $handlerMethod, $handler) = $item;
+														$preparedRoute = preg_quote($route, '/');
+														if ($method == $handlerMethod && preg_match("/^$preparedRoute$/i", $uri)) {
+															echo $handler();
+															return;
+														}
+													}
+												}
+
+												private function append($method, $route, $handler)
+												{
+													$this->handlers[] = [$route, $method, $handler];
+												}
+												// END
+									
+									
+									
+									
+									
+									
+			
+			
+			
+			
+			
+			
+			

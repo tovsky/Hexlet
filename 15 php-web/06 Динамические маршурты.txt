@@ -1,0 +1,185 @@
+
+	В вебе динамические маршруты встречаются гораздо чаще.
+	Задаем маршруты, в котором есть динамические части, мы говорим как они именуются и после этого мы их извлекаем.
+	
+	Например  localhost:8080/users/100/articles/2   Мы берем юзера с айдишником 100 и распечатываем его статью под номером 2.
+	
+	
+				// Файл  index.php	
+					<?php 
+					
+					namespace App;
+					
+					require_once 'Application.php';
+					
+					$app = new Application();
+					
+					$app->get('users/(?P<id>\d+)', function ($params, $arguments) {			// Самый простой способ задания дин маршрута это написание рег выражения в описании маршрута
+						return json_encode($arguments);										// В скобках именованная группа, которая будет иметь имя  id  а сама регулярка это \d+    какоето количество цифр 
+					});
+					
+					$app->get('/users/(?P<userId>\d+)/articles/(?P<id>[\w-]+)', function ($params, $arguments) {			// $arguments  это как раз то, что приходит динамических именованных групп 
+						return json_encode($arguments);
+					});
+					
+					$app->run();
+					
+	Во втором get другая регулярка это слова. это шаг к ЧПУ.				
+	
+	
+				//   Фрагмент файла    Application.php
+										public function run()
+										{
+											$uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+											$method = $_SERVER['REQUEST_METHOD'];
+											foreach ($this->handlers as $item) {
+												list($route, $handlerMethod, $handler) = $item;
+												$preparedRoute = str_replace('/', '\/', $route);
+												$matches = [];
+												if ($method == $handlerMethod && preg_match("/^$preparedRoute$/i", $uri, $matches)) {		// Если в строке будут совпадения с регуляркой, то они будут попадать в $matches
+													$arguments = array_filter($matches, function ($key) {
+														return !is_numeric($key);								// делаем фильтрацию что ключи не числовые  (особоенность выходного масива preg_match, что все вперемешку)
+													}, ARRAY_FILTER_USE_KEY);
+													echo $handler($_GET, $arguments);
+												}
+											}
+										}							
+										
+										
+										
+ТЕСТЫ
+	Что будет если совпадут названия параметров из строки запроса и имена параметров из маршрута?
+		Эти параметры между собой не связаны
+							НЕВЕРНЫЙ		￼Параметры запроса перепишут параметры маршрута
+							НЕВЕРНЫЙ		￼Параметры маршрута перепишут параметры запроса
+										
+
+
+
+ВОПРОСЫ
+	Адам Сапралиев
+		Привет! Не подскажете, что лучше сделать после данного курса: написать свой велосипед или изучить готовый фреймворк (Laravel)? 
+		 И нужно ли знать php-разработчику angular.js? Все админ-панели на этом фреймворке. Спасибо.
+	Kirill MokevninPRO
+		После этого курсе изучите микрофреймворк: http://www.slimframework.com/ На нем вы закрепите изученные 
+		 концепции и дальше уже сможете двигаться в сторону больших фреймворков.
+		 А в js ситуация такая же как и любом другом языке. Сначала надо выучить js и научиться на нем писать, а потом уже браться за фреймворки. 
+		  Посмотрите вот это видео https://www.youtube.com/watch?v=DCeNCr2tKOI
+	Nikita Strelkov
+		а почему именно slim, а не Lumen или Silex, которые реализованы как уменьшенные версии Laravel и Symfony? 
+		 Ведь с них, наверное, будет проще перейти на "старших братьев" ?
+	Kirill MokevninPRO
+		Концепции в микрофреймворках одинаковые, поэтому не принципиально.
+
+
+										
+										
+ЗАДАНИЕ
+	Другой способ работы с роутингом это плейсхолдеры. Пример: /users/:id. Плейсхолдеры это такие 
+	 "заполнители", которые используются вместо написания регулярного выражения напрямую. 
+	 Удобство заключается в том что их гораздо проще использовать и понимать.
+
+	Пример:
+
+	<?php
+
+	$app = new Application();
+
+	$app->get('/users/:id', function ($params, $arguments) {
+		// $params['id'] будет содержать часть uri из :id
+		return json_encode($arguments);
+	});
+	$ curl localhost:8080/users/3
+	{id: 3}
+	Обычно на плейсхолдеры не накладывается ограничений. Они могут появляться внутри uri 
+	 в любом месте. Например мы можем определить такой маршрут: /users/:userId/photos/:id.
+
+	src/App/Application.php
+	Реализуйте работу с плейсхолдерами в src/app/Application.php.
+
+	Алгоритм работы с плейсхолдерами достаточно прост. Все работает практически так же как и 
+	 с регулярными выражениями + один шаг. На этом шаге плейсхолдеры заменяются 
+	 на регулярные выражения. По умолчанию регулярное выражение, на которое 
+	 заменяются плейсхолдеры, это [\w-]+, при этом не забывайте что группа должна быть именованной.
+										
+					// Файл index.php
+						<?php
+
+						namespace App;
+
+						require_once '/composer/vendor/autoload.php';
+
+						$app = new Application();
+
+						$app->get('/users/:id', function ($params, $arguments) {
+							return json_encode($arguments);
+						});
+
+						$app->get('/users/:userId/articles/:id', function ($params, $arguments) {
+							return json_encode($arguments);
+						});
+
+						$app->run();
+					
+										
+										
+					
+
+					// Файл Application.php	
+						<?php
+
+						namespace App;
+
+						class Application
+						{
+							private $handlers = [];
+
+							public function get($route, $handler)
+							{
+								$this->append('GET', $route, $handler);
+							}
+
+							public function post($route, $handler)
+							{
+								$this->append('POST', $route, $handler);
+							}
+
+							private function append($method, $route, $handler)
+							{
+								// BEGIN (write your solution here)
+								$updatedRoute = $route;
+								if (preg_match_all('/:([^\/]+)/', $route, $matches)) {
+									$updatedRoute = array_reduce($matches[1], function ($acc, $value) {
+										$group = "(?P<$value>[\w-]+)";
+										return str_replace(":{$value}", $group, $acc);
+									}, $route);
+								}
+								// END
+
+								$this->handlers[] = [$updatedRoute, $method, $handler];
+							}
+
+							public function run()
+							{
+								$uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+								$method = $_SERVER['REQUEST_METHOD'];
+								foreach ($this->handlers as $item) {
+									list($route, $handlerMethod, $handler) = $item;
+									$preparedRoute = str_replace('/', '\/', $route);
+									$matches = [];
+									if ($method == $handlerMethod && preg_match("/^$preparedRoute$/i", $uri, $matches)) {
+										$arguments = array_filter($matches, function ($key) {
+											return !is_numeric($key);
+										}, ARRAY_FILTER_USE_KEY);
+										echo $handler($_GET, $arguments);
+									}
+								}
+							}
+						}
+
+										
+										
+										
+										
+										
+										

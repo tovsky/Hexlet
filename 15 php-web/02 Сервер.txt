@@ -1,0 +1,95 @@
+
+	Из коробки встроен сервер.
+	
+							
+					static:
+						php -S localhost:3000
+						
+						curl localhost:3000/index.php	
+						
+						
+					dynamic:
+						php -S localhost:3000 index.php
+				
+	
+	
+	Простейший роутер. Точка входа сайта это  index.php  
+	 Имеется суперглобальный массив  $_SERVER 
+	 На вход принимает  REQUEST_URI    -  путь по которому мы идем по   HTTP.   когда то давно это были файлы и папки, но теперь все через роутер.
+	 Роутинг - способ диспечеризации, когда мы определяем что делать в зависимости от того какой приходит url.
+	 Принадлежность PHP  для веба: ниже видно, что заголовки мы не формируем, они автоматически, а 
+	  для того чтобы вывести body   достаточно  команды  echo и он выводит данные в HTTP боди.
+	 
+						// Файл  index.php
+							function server($url) 
+							{
+								if ('/' === $url) {
+									return "<p>Welcome to PHP</p>";
+								} elseif ('/about' === $url) {
+									return "about company";
+								} elseif ('/server' === $url) {
+									print_r($_SERVER);
+								}
+							}
+							
+							echo server($_SERVER['REQUEST_URI']);
+							
+			
+	
+ТЕСТЫ
+	Зачем нужен роутинг?
+		Чтобы выполнять разный код (разные обработчики) в зависимости от запрошенного урла
+		
+	Что будет происходить, если скрипт который отрабатывает на запросы (index.php) не использует роутинг?
+		На любой запрос (любой uri) всегда будет одинаковый ответ
+		
+		
+		
+		
+ЗАДАНИЕ
+	public/index.php
+	Реализуйте маршрут /about, по которому будет отдаваться строка <h1>about company</h1>. 
+	 Выполните сопоставление с REQUEST_URI используя регулярные выражения, так чтобы один 
+	 маршрут обрабатывал и концевой слеш (/about/ тоже самое что /about), и различный 
+	 регистр (/abOuT, /ABout, /about).
+
+	Подсказка
+	Для регулярных выражений используйте preg_match.
+	
+						// мое решение 
+							// Файл index.php
+								<?php
+
+								namespace App;
+
+								require_once '/composer/vendor/autoload.php';
+
+								// BEGIN (write your solution here)
+								$path = preg_match('/about(\/){0,1}/i', $_SERVER['REQUEST_URI']);
+
+								if ($path) {
+									echo '<h1>about company</h1>';
+								} elseif ($_SERVER['REQUEST_URI'] == '/') {
+									echo 'Главная страница';
+								}
+								// END
+	
+	
+	
+							// Контрольное решение
+								// BEGIN
+								function server($url)
+								{
+									if (preg_match('/^\/about\/?$/i', $url)) {
+										return "<h1>about company</h1>";
+									}
+								}
+
+								echo server($_SERVER['REQUEST_URI']);
+								// END
+								
+								
+								
+								
+								
+								

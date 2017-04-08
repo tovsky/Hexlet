@@ -1,0 +1,101 @@
+
+	Работа с заголовками HTTP также встроено в  php , как и все для ВЕБ программирования.
+	
+				// ФАйл  index.php	
+					<?php 
+					
+					namespace Theory;
+					
+					require_once 'Application.php';
+					
+					$app = new Application();
+					
+					$app->get('/', function ($params, $arguments) {
+						return 'hello, world';
+					});
+					
+						// Классический маршрут для авторизации пользователя, и делающего редирект, например на главную. Данные приходят методом пост.
+					$app->post('/sign_in', function ($params, $arguments) {		
+						$headers = getallheaders(); 		// getallheaders  возвращает абсолютно все заголовки
+															// Также заголовки содержатся в глоб массиве $_SERVER  но там они хранятся в неудобном виде.
+						
+						error_log(print_r($_SERVER, true));
+						http_responce_code(302);				// Выставление кода ответа. 302 - код временного редиректа
+						header("Location: http://localhost:8080");		// header() устанавливает заголовки 
+						
+						return print_r($headers, true);
+					});
+					
+					$app->run();
+					
+					
+ТЕСТЫ
+	Как можно получить заголовки запроса?
+		они содержатся в $_SERVER
+		вызвав функцию getallheaders()
+	
+	Какой код нужно подставить, чтобы ответом было bad request
+		http_response_code(400)
+		
+		
+		
+		
+		
+		
+ЗАДАНИЕ
+	Для формирования ответа очень часто использую специальный Response Builder, 
+	 который накапливает в себе данные, которые должны быть отправлены клиенту. 
+	 Это такие данные, как статус, различные заголовки и тело ответа.
+
+	В данном упражнении необходимо реализовать интерфейс ResponseInterface в классе 
+	 Response, описав логику накопления данных ответа, а так же реализовать логику 
+	 разбора и отправки этих данных клиенту в классе Application.
+
+	Пример использования Response Builder:
+
+	<?php
+
+	$app->get('/', function () {
+		return response(render('index'));
+	});
+
+	$app->post('/users', function ($meta, $params, $attributes) use ($users) {
+		if (!isset($params['email'])) {
+			return response('Expected email')->withStatus(400);
+		}
+		return response()->redirect('/');
+	});
+	
+	src/App/Response.php
+	Реализуйте интерфейс ResponseInterface в классе Response.
+
+	src/App/Application.php
+	Реализуйте логику отправки ответа клиенту. Сначала необходимо извлечь и 
+	 отправить статус, затем отправить все заголовки и в конце тело ответа, если оно есть.
+			
+			
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		

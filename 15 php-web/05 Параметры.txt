@@ -1,0 +1,199 @@
+
+	Параметры
+	Цель: Рассмотреть параметры запроса, как они обрабатываются и как сочетаются с роутингом.
+	
+	Часто запросы к сайту содержа query params    которые идут после  uri?page=3&roll=off
+	query params    идут первой строкой в заголовках.
+	
+	Эти параметры не являются частью роутинга. роутинг описан в uri   а параметры приходят в обработчик.
+	Эти параметры приходят в глобальный массив  $_GET
+	Многие говорят GeT параметры, имея ввиду, что они из этого массива, на самом деле 
+	 это query параметры и они не имеют отношению к GET как к глаголу HTTP. 
+	Эти параметры НИКАК не зависят от того какой выбран глагол GET или POST. query params  все также будут попадать в глобальный масси $_GET 
+	
+		Есть еще глобальный массив $_REQUEST  который не рекомендуют к исполльзованию, так как могут быть проблемы с безопасностью.
+		Он объединяет в себе массив $_GET $_POST $_COOKIE
+		
+		
+	Как получить эти параметры? 
+							// Файл index.php   
+								<?php 
+									namespace App;
+									
+									require_once 'Application.php';
+									
+									$app = new Application();
+									
+									$app->get('/', function () {
+										/* $_REQUEST */
+										return json_encode($_GET);
+									});
+									
+									$app->post('/', function () {
+										return json_encode($_GET);
+									});
+									
+									$app->run();
+		
+
+		
+		
+ТЕСТЫ
+	С какими глаголами http можно отправлять query params?
+		Параметры не связаны с глаголом и могут отправляться всегда
+		
+	Для чего правильно использовать query params?
+		Для фильтраций
+		Для лимитирования
+		Как роутинг в случае отсутствия возможности задавать полноценные url	
+		
+		
+		
+	
+ЗАДАНИЕ
+	public/index.php
+	Реализуйте маршрут /, который может принимать параметр sort и выполнять сортировку $data в 
+	 соответствии с содержимым этого параметра. Формат sort: field direction. field - название поля, 
+	 direction - либо asc либо desc. Пример: id desc.
+
+	Отдаваемые данные должны кодироваться в json с помощью функции json_encode.
+
+	Пример:
+
+	<?php
+
+	$data = [
+		['id' => 4, 'age' => 15],
+		['id' => 3, 'age' => 28],
+		['id' => 8, 'age' => 3],
+		['id' => 1, 'age' => 23]
+	];
+
+	$actual = file_get_contents('http://localhost:8080?sort=age+desc');
+
+	$expected = [
+		['id' => 3, 'age' => 28],
+		['id' => 1, 'age' => 23],
+		['id' => 4, 'age' => 15],
+		['id' => 8, 'age' => 3]
+	];
+
+	json_encode($expected) == $actual
+	
+	
+								// Файл Application.php
+									<?php
+
+									namespace App;
+
+									class Application
+									{
+										private $handlers = [];
+
+										public function get($route, $handler)
+										{
+											$this->append('GET', $route, $handler);
+										}
+
+										public function post($route, $handler)
+										{
+											$this->append('POST', $route, $handler);
+										}
+
+										public function run()
+										{
+											$uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+											$method = $_SERVER['REQUEST_METHOD'];
+											foreach ($this->handlers as $item) {
+												list($route, $handlerMethod, $handler) = $item;
+												$preparedRoute = preg_quote($route, '/');
+												if ($method == $handlerMethod && preg_match("/^$preparedRoute$/i", $uri)) {
+													echo $handler($_GET);
+												}
+											}
+										}
+
+										private function append($method, $route, $handler)
+										{
+											$this->handlers[] = [$route, $method, $handler];
+										}
+									}
+
+	
+								
+								// Файл index.php
+									<?php
+
+									namespace App;
+
+									require_once '/composer/vendor/autoload.php';
+
+									$app = new Application();
+
+									$data = [
+										['id' => 4, 'age' => 15],
+										['id' => 3, 'age' => 28],
+										['id' => 8, 'age' => 3],
+										['id' => 1, 'age' => 23]
+									];
+
+									// BEGIN (write your solution here)
+									$app->get('/', function ($params) use ($data) {
+										if (array_key_exists('sort', $params)) {
+											list($key, $order) = explode(' ', $params['sort']);
+
+											usort($data, function ($prev, $next) use ($key, $order) {
+												$prevValue = $prev[$key];
+												$nextValue = $next[$key];
+
+												if ($prevValue == $nextValue) {
+													return 0;
+												}
+
+												if ($order == 'desc') {
+													return $prevValue < $nextValue ? 1 : -1;
+												} else if ($order == 'asc') {
+													return $prevValue > $nextValue ? 1 : -1;
+												}
+											});
+										}
+										return json_encode($data);
+									});
+									// END
+
+									$app->run();
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+	
+	
+	
+	
+	
+	
+	
