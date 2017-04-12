@@ -102,7 +102,33 @@
 					
 
 					
-					
+							<?php
+
+							namespace App\FileUtils;
+
+							function grep($string, $path)
+							{
+								// BEGIN
+								$iterator = new \GlobIterator($path);
+								$lines = [];
+								foreach ($iterator as $path => $info) {
+									if (!$info->isFile()) {
+										continue;
+									}
+									$content = file($path);
+									foreach ($content as $line) {
+										if (false !== strpos($line, $string)) {
+											$lines[] = $line;
+										}
+									}
+
+								}
+
+								return $lines;
+								// END 
+							}
+												
+												
 					
 					
 					

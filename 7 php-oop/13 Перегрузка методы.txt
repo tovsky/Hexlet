@@ -33,3 +33,33 @@
 	Бросайте исключение WrongFinderNameException, если название метода не соответствует шаблону /findAllBy([A-Z].*)/.
 	Подсказки
 	 Для работы с регулярными выражениями используйте функцию preg_match_all.
+	 
+	 
+	 
+	 
+					// Файл Repository.php
+						    // BEGIN (write your solution here)
+							private $tableName;
+
+							public function __construct($tableName)
+							{
+								$this->tableName = $tableName;
+							}
+
+							public function __call($finder, $arguments)
+							{
+								preg_match("/findAllBy([A-Z].*)/", $finder, $outputArray);
+								if (!$outputArray) {
+									throw new WrongFinderNameException();
+								}
+								$fieldUpperName = $outputArray[1];
+								preg_match_all("/([A-Z][^A-Z]+)/", $fieldUpperName, $matches);
+								$fieldName = implode('_', array_map(function ($part) {
+									return mb_strtolower($part);
+								}, $matches[0]));
+
+								return $this->where($fieldName, $arguments[0]);
+							}
+							// END
+	 
+	 

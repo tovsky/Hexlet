@@ -75,9 +75,141 @@
 			
 			
 		
-		
-		
-		
+							// Файл Application.php
+								<?php
+
+								namespace App;
+
+								class Application
+								{
+									private $handlers = [];
+
+									public function get($route, $handler)
+									{
+										$this->append('GET', $route, $handler);
+									}
+
+									public function post($route, $handler)
+									{
+										$this->append('POST', $route, $handler);
+									}
+
+									private function append($method, $route, $handler)
+									{
+										$updatedRoute = $route;
+										if (preg_match_all('/:([^\/]+)/', $route, $matches)) {
+											$updatedRoute = array_reduce($matches[1], function ($acc, $value) {
+												$group = "(?P<$value>[\w-]+)";
+												return str_replace(":{$value}", $group, $acc);
+											}, $route);
+										}
+										$this->handlers[] = [$updatedRoute, $method, $handler];
+									}
+
+									public function run()
+									{
+										$uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+										$method = $_SERVER['REQUEST_METHOD'];
+										foreach ($this->handlers as $item) {
+											list($route, $handlerMethod, $handler) = $item;
+											$preparedRoute = str_replace('/', '\/', $route);
+											$matches = [];
+											if ($method == $handlerMethod && preg_match("/^$preparedRoute$/i", $uri, $matches)) {
+												$attributes = array_filter($matches, function ($key) {
+													return !is_numeric($key);
+												}, ARRAY_FILTER_USE_KEY);
+
+												$meta = [
+													'method' => $method,
+													'uri' => $uri,
+													'headers' => getallheaders()
+												];
+
+												$response = $handler($meta, array_merge($_GET, $_POST), $attributes);
+												// BEGIN (write your solution here)
+												http_response_code($response->getStatusCode());
+												foreach ($response->getHeaderLines() as $header) {
+													header($header);
+												}
+												echo $response->getBody();
+												// END
+												return;
+											}
+										}
+									}
+								}
+
+						
+							// Файл Response.php
+								<?php
+
+								namespace App;
+
+								function response($body = null)
+								{
+									return new Response($body);
+								}
+
+								class Response implements ResponseInterface
+								{
+									protected $headers = [];
+									protected $status = 200;
+									protected $body;
+
+									public function __construct($body)
+									{
+										if (is_string($body)) {
+											$this->headers['Content-Length'] = mb_strlen($body);
+										}
+										$this->body = $body;
+									}
+
+									// BEGIN (write your solution here)
+									public function redirect($url)
+									{
+										$this->status = 302;
+										$this->headers['Location'] = $url;
+
+										return $this;
+									}
+
+									public function withStatus($status)
+									{
+										$this->status = $status;
+										return $this;
+									}
+
+									public function format($format)
+									{
+										switch ($format) {
+											case 'json':
+												$this->headers['Content-Type'] = 'json';
+												$this->body = json_encode($this->body);
+												$this->headers['Content-Length'] = mb_strlen($this->body);
+										}
+
+										return $this;
+									}
+
+									public function getStatusCode()
+									{
+										return $this->status;
+									}
+
+									public function getBody()
+									{
+										return $this->body;
+									}
+
+									public function getHeaderLines()
+									{
+										return array_map(function ($key, $value) {
+											return "$key: $value";
+										}, array_keys($this->headers), $this->headers);
+									}
+									// END
+								}
+
 		
 		
 		
