@@ -1,0 +1,59 @@
+
+	Цель: Познакомиться с еще одной полезной функцией высшего порядка: filter.
+	
+	
+ТЕСТЫ
+	Фильтрация, в отличие от map, позволяет
+		получать часть исходного множества согласно критерию
+			
+	В каких преобразованиях уместно использовать filter?
+		получение множества букв немецкого алфавита из множества всех символов юникода
+		получение всех чисел больше 49 из множества целых чисел		
+	
+	Дано множество целых чисел от 0 до 1492. Необходимо получить часть этого множества, которое состоит 
+	 из четных чисел больше 10, и умножить каждое из этих чисел на 9.
+	Какие функции нужно использовать для проведения такой операции?
+		filter и map
+	
+	
+	
+	
+	
+	
+ССЫЛКИ
+	https://en.wikipedia.org/wiki/Filter_(higher-order_function)
+	
+	
+
+ЗАДАНИЕ
+	Solution.php
+	Реализуйте функцию filter, используя итеративный процесс.
+	Подсказки:
+	Функция reverse переворачивает список. Она доступна в скрипте.
+	
+									<?php
+
+									namespace App\Solution;
+
+									require 'Pair.php';
+
+									use function App\Pair\cons;
+									use function App\Pair\car;
+									use function App\Pair\cdr;
+									use function App\Pair\reverse;
+									use function App\Pair\listToString;
+
+									function filter($func, $list)
+									{
+										// BEGIN (write your solution here)
+										$iter = function ($list, $acc) use (&$iter, $func) {
+											if ($list === null) {
+												return reverse($acc);
+											}
+
+											$newAcc = $func(car($list)) ? cons(car($list), $acc) : $acc;
+											return $iter(cdr($list), $newAcc);
+										};
+										return $iter($list, null);
+										// END
+									}

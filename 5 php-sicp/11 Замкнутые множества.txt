@@ -1,0 +1,107 @@
+
+	Мы можем использовать пары внутри пар.
+	Так можем создавать иерархические структуры обладающие вложенностью.
+	Такая способность называется замыканием, но это не то замыкание как способ которое позволяет запомнить переменную внутри функции из внешнего окружения.
+	
+	Операция является замкнутой если результат этой операции снова применим к этой операции.
+					cons(cons(10, 11), cons(1, 30))
+					
+	Список (последовательность) - одна из полезных структур, которую можем построить.
+						cons(1, cons(2, cons(3, null)))  
+	В списке (1, 2, 3) 1 является головой head списка, а (2, 3) хвостом tail списка.
+	
+	Можем сделать функцию для большего удобства работы со списками. (назовем)
+						makeList(1, 2, 3);    аналогична cons(1, cons(2, cons(3, null))) 
+						
+						
+	Напишем функцию для работы со списком.
+						function listRef($list, $n)					// Возвращает значение списка n-го 
+						{
+							if ($n == 0) {
+								return car($list);
+							} else {
+								return listRef(cdr($list), n -1); 		//Срезаем голову. 
+							}
+						}
+	
+	
+	
+ССЫЛКИ
+	https://ru.wikipedia.org/wiki/%D0%97%D0%B0%D0%BC%D1%8B%D0%BA%D0%B0%D0%BD%D0%B8%D0%B5_(%D0%B0%D0%BB%D0%B3%D0%B5%D0%B1%D1%80%D0%B0)
+
+	
+
+ТЕСТЫ
+	Является ли множество целых чисел замкнутым под операцией сложения?
+		да
+
+	Дан список в таком виде:
+	$l = cons(1, cons(3, cons(5, null)));
+	Какое значение будет возвращено при вызове car(cdr($l))?
+		3
+		
+	Дан список в таком виде:
+	$l = cons(1, cons(3, cons(5, null)));
+	Какое значение будет возвращено при вызове cdr(cdr(cdr($l)))?
+		null
+		
+	Дан список в таком виде:
+	$l = cons(1, cons(3, cons(5, null)));
+	Как получить значение 5?
+		car(cdr(cdr($l)))
+		
+
+		
+ЗАДАНИЕ
+	src/App/Length.php
+	Реализуйте функцию length, которая считает длину списка;
+	
+	src/App/Append.php
+	Реализуйте функцию append, которая соединяет два списка;
+	Подсказка:
+	Попробуйте сначала представить как работала бы функция copy, которая принимает на вход список и возвращает его копию.
+
+	src/App/Reverse.php
+	Реализуйте функцию reverse, которая переворачивает список;
+
+
+							function append($list1, $list2)
+							{
+								// BEGIN (write your solution here)
+								if ($list1 === null) {
+									return $list2;
+								} else {
+									return cons(car($list1), append(cdr($list1), $list2));
+								}
+								// END
+							}
+							
+							function length($items)
+							{
+								// BEGIN (write your solution here)
+								if ($items === null) {
+									return 0;
+								} else {
+									return 1 + length(cdr($items));
+								}
+								// END
+							}
+
+
+							function reverse($list)
+							{
+								// BEGIN (write your solution here)
+								$iter = function ($items, $acc) use (&$iter) {
+									if ($items === null) {
+										return $acc;
+									} else {
+										return $iter(cdr($items), cons(car($items), $acc));
+									}
+								};
+
+								return $iter($list, null);
+								// END
+							}
+
+
+		

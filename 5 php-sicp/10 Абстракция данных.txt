@@ -1,0 +1,164 @@
+
+	Есть данные 
+				$rat = makeRat(1, 2); 		  создали вещ число   1/2
+				
+				echo numer($rat);			// 1 
+				echo denom($rat);			// 2 
+		
+	теперь на более высоком уровне мы можем реализовать функции использующие вещественные числа.
+
+				addRat($rat, makeRat(2, 3));		// 7/6
+				
+				
+	реализация функции addRat
+				function addRat($rat1, $rat2)
+				{
+					$numer = numer($rat1) * denom($rat2) + numer(rat2) * denom($rat1);
+					$denom = denom($rat1) * denom($rat2);
+					
+					return makeRat($numer, $denom);
+				}
+				
+				function printRat($rat)
+				{
+					printf("%d/%d", numer($rat), denom($rat));
+				}
+				
+	точно также можно создать функции вычитания, умножения и прочее для веще чисел.
+
+	
+	
+	БАРЬЕР абстракции
+	
+		1. Рациональные числа в предметной области. 
+			#addRat subRat equalsRat  
+			
+		2. Рациональные числа как числители со знаменателями
+			# makeRat numer denom								// в теории этот уровень не виден на верхнем
+			
+		3. Рациональные числа как пары
+			# cons car cdr
+			
+		4. То как реализуются пары
+		
+	Это принцип одного уровня абстракции
+	 Любой уровень построен на более низком, но не смотрит более чем на уровень ниже, 
+	  а уровень ниже не знает о более высоком, не знает, что построено на его основе.
+	Происходит односторонняя зависимость.
+	
+	ПРИМЕР	TCP/IP
+	
+	
+				
+ССЫЛКИ
+	https://ru.wikipedia.org/wiki/%D0%90%D0%B1%D1%81%D1%82%D1%80%D0%B0%D0%BA%D1%86%D0%B8%D1%8F_%D0%B4%D0%B0%D0%BD%D0%BD%D1%8B%D1%85
+
+
+ТЕСТЫ
+	Программа работает с географическими координатами для вычисления расстояний между точками. Координаты 
+	 передаются в виде специальных структур данных, так, что широту и долготу можно получить с помощью 
+	 специальных функций. Широта и долгота представлены в виде чисел, и программе необходимо знать, на 
+	 каком компьютере были сохранены данные: на 32-битном или 64-битном. Для этого в структуре данных 
+	 записан специальный флаг, а в программе реализованы две функции для обработки двух форматов чисел.
+	Нарушается ли в этом случае концепция абстракции данных?
+		да
+		
+	Функция addRat (из видео) производит вычисления с рациональными числами как
+		как с парами целых чисел, получая их с помощью специальных методов
+		
+	Какой из этих уровней абстракции находится «выше», то есть ближе к конкретной предметной области, области применения?
+		реализация структуры данных «пара»  (нет)
+		реализация рациональных чисел как пары целых чисел ДА 
+
+
+
+ЗАДАНИЕ
+	Solution.php
+	Реализуйте функцию subRat, которая вычитает из одной пары другую и возвращает в качестве результата 
+	 новую пару.
+	Реализуйте функцию equalRat, которая сравнивает две пары на равенство.
+			
+			
+			
+		
+							// Решение мое и контрольное 
+							// Файл Solution.php
+								<?php
+
+								namespace App\Solution;
+
+								require 'Pair.php';
+
+								use function App\Pair\cons;
+								use function App\Pair\car;
+								use function App\Pair\cdr;
+
+								function makeRat($numer, $denom)
+								{
+									return cons($numer, $denom);
+								}
+
+								function numer($rat)
+								{
+									return car($rat);
+								}
+
+								function denom($rat)
+								{
+									return cdr($rat);
+								}
+
+								// BEGIN (write your solution here)
+								function subRat($rat1, $rat2)
+								{
+									$numer = numer($rat1) * denom($rat2) - numer($rat2) * denom($rat1);
+									$denom = denom($rat1) * denom($rat2);
+
+									return makeRat($numer, $denom);
+								}
+
+								function equalRat($rat1, $rat2)
+								{
+									return numer($rat1) * denom($rat2) == numer($rat2) * denom($rat1);
+								}
+								// END
+
+							
+
+							// Файл Pair.php
+								<?php
+
+								namespace App\Pair;
+
+								function cons($x, $y)
+								{
+									return function ($method) use ($x, $y) {
+										switch ($method) {
+											case "car":
+												return $x;
+											case "cdr":
+												return $y;
+										}
+									};
+								}
+
+								function car(callable $pair)
+								{
+									return $pair("car");
+								}
+
+								function cdr(callable $pair)
+								{
+									return $pair("cdr");
+								}
+
+							
+		
+		
+		
+		
+		
+		
+		
+
+	

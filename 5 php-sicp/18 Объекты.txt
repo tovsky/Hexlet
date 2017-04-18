@@ -1,0 +1,51 @@
+
+	Цель: Продолжить изучение оператора присваивания и перейти к созданию объектов.
+	
+	
+	
+	
+ЗАДАНИЕ
+	Solution.php
+	Измените функцию newAccount из видео так, чтобы она создавала счета, защищенные паролем.
+
+	Пример:
+
+	$acc = newAccount(100, "secret password");
+	110 == $acc("deposit", 10, "secret password");
+	60 == $acc("withdraw", 50, "secret password");
+	"wrong password!" == $acc("deposit", 10, "wrong password");
+	
+							// Решение
+							<?php
+
+							namespace App;
+
+							function newAccount($balance, $password)
+							{
+								$withdraw = function ($amount) use (&$balance) {
+									$balance -= $amount;
+									return $balance;
+								};
+
+								$deposit = function ($amount) use (&$balance) {
+									$balance += $amount;
+									return $balance;
+								};
+
+								// BEGIN (write your solution here)
+								return function ($funcName, $amount, $p) use ($password, $withdraw, $deposit) {
+									if ($password !== $p) {
+										return "wrong password!";
+									}
+
+									switch ($funcName) {
+										case "withdraw":
+											return $withdraw($amount);
+											break;
+										case "deposit":
+											return $deposit($amount);
+											break;
+									}
+								};
+								// END
+							}

@@ -56,4 +56,54 @@
 	$user->save(); // false
 	
 	
+							// файл SolutionTest.php
+								<?php
+
+								namespace App;
+
+								class TestSolution extends \PHPUnit_Framework_TestCase
+								{
+									// BEGIN (write your solution here)
+									private $user;
+									private $connection;
+
+									public function setUp()
+									{
+										$this->connection = $this->getMockBuilder('App\DbInterface')
+											->setMethods(['query', 'transaction'])
+											->getMock();
+
+										$this->user = new User($this->connection);
+									}
+
+									public function testSaveNew()
+									{
+										$this->connection->expects($this->once())
+											->method('query');
+
+										$this->user->save();
+									}
+
+									public function testTrySaveTwice()
+									{
+										$this->connection->expects($this->once())
+											->method('query');
+
+										$this->user->save();
+										$this->user->save();
+									}
+
+									public function testSaveTwice()
+									{
+										$this->connection->expects($this->exactly(2))
+											->method('query');
+
+										$this->user->save();
+
+										$this->user->setFirstName('John');
+										$this->user->save();
+									}
+									// END
+								}
+									
 	

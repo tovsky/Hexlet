@@ -1,0 +1,199 @@
+
+	Еще одним свойством функции высшего порядка является возможность возвращать 
+	 функции в качестве результатов выполнения функций.
+	 
+					function sumGenerator($func) {
+						return function($a, $b) use ($func) {			// параметр $func передается внутрь как замыкание, чтобы запомнить и использовать
+							return sum($a, $b $func);
+						};
+					}
+					
+					function sum($a, $b, $func) {
+						if ($a > $b) {return 0;}
+						return $func($a) + sum($a + 1, $b, $func);
+					}
+					
+					$sumIntegers = sumGenerator(function($x) {return $x * $x; });
+					echo $sumIntegers(1, 5);
+					
+			
+
+
+	Ниже приведен пример определения функции, которая возводит свой аргумент в переданную степень 
+	 (как замыкание). Один пример через прямое определение лямбды, второй через функцию, которая внутри 
+	 себя определяет точно такую же лямбду и возвращает ее. Результат эквивалентен.
+
+	Определение напрямую:
+
+			<?php
+
+			$exponent = 3;
+			$func = function ($number) use ($exponent) {
+				return $number ** $exponent; // операция возведения в степень
+			};
+
+			8 == $func(2); // 2^3
+			
+	Определение через вызов функции:
+
+			<?php
+
+			function power($exponent)
+			{
+				return function ($number) use ($exponent) {
+					return $number ** $exponent; // операция возведения в степень
+				}
+			};
+
+			$func = power(3);
+			8 == $func(2); // 2^3
+			
+			
+			
+ТЕСТЫ
+	Что обозначает запись return function () { ...}?
+		определение лямбда функции и возврат ее как значения
+
+	Что дает нам возможность возвращать функции как значения?
+		Возможность задавать алгоритмы в более обобщенном виде, без спецификации деталей.
+		Возможность повышать уровень абстракции
+		
+		
+ВОПРОСЫ
+	Иван СиневичPRO
+		$sumIntegers = sumGenerator(function($x) {return $x * $x; });
+		echo $sumIntegers(1, 5);
+		Вопрос по теории, у нас в $sumIntegers один аргумент это функция. Как так получается что мы 
+		 в $sumIntegers передаём 2 аргумента?
+	Александр О.PRO
+		Вопрос по теории, у нас в $sumIntegers один аргумент это функция.
+		нет, проявите внимательность - один аргумент-функция передаётся в функцию sumGenerator. А вот 
+		 результат её вызова (sumGenerator(function($x) {return $x * $x; })), который (этот результат) 
+		 в свою очередь является функцией от двух аргументов, записывается в переменную $sumIntegers.
+		Таким образом, мы можем делать вызов записанной в эту переменную функции, передавая два аргумента, 
+		 например, $sumIntegers(1, 5);.
+
+ЗАДАНИЕ
+	Factor.php
+	Реализуйте функцию factor, которая принимает на вход число (множитель) и возвращает функцию. Получившаяся 
+	 функция принимает на вход один аргумент и возвращает результат умножения этого аргумента на множитель.
+
+	Пример:
+
+	$multiTwo = factor(2); // 2 - множитель
+
+	4 == $multiTwo(2); // 2 * 2
+	20 == $multiTwo(10); // 10 * 2
+	
+	Double.php
+	Реализуйте функцию double, которая принимает как аргумент функцию с одним аргументом и возвращает 
+	 функцию, которая применяет исходную функцию дважды.
+
+	Пример:
+
+	Исходная функция с одним аргументом:
+
+	2 == $increment(1); // функция увеличивает свой аргумент на единицу
+	double вернул новую функцию, которая применяет inc дважды:
+
+	$increment2 = double($increment);
+	3 == $increment2(1) // эквивалентно $increment($increment(1));
+	Тут мы применяем double дважды и в итоге increment выполняется 4 раза:
+
+	$increment4 = double(double($increment));
+	5 == $increment4(1);
+
+
+								// мое решение 
+									// Файл Factor.php
+										<?php
+
+										namespace App\Factor;
+
+										function factor($multiplier)
+										{
+											// BEGIN (write your solution here)
+											return function ($n) use ($multiplier) {
+												return $multiplier * $n;
+											};
+											// END
+										}
+
+									
+									// Файл Double.php
+										<?php
+
+										namespace App\Double;
+
+										function double($func)
+										{
+											// BEGIN (write your solution here)
+											return function ($n) use ($func) {
+												return $func($func($n));
+											};
+											// END
+										}
+
+
+							// контрольное решение
+								    // BEGIN
+									return function ($arg) use ($func) {
+										return $func($func($arg));
+									};
+									// END
+
+
+									
+									
+									    // BEGIN
+										return function ($arg) use ($func) {
+											return $func($func($arg));
+										};
+										// END
+
+
+
+							// ФАйл TestSolution.php
+								<?php
+
+								namespace App;
+
+								require_once "Factor.php";
+								require_once "Double.php";
+
+								use function App\Factor\factor;
+								use function App\Double\double;
+
+								class TestSolutions extends \PHPUnit_Framework_TestCase
+								{
+									public function testFactor()
+									{
+										$multiTwo = factor(2);
+
+										$this->assertEquals(4, $multiTwo(2));
+										$this->assertEquals(20, $multiTwo(10));
+
+										$multiTen = factor(10);
+
+										$this->assertEquals(10, $multiTen(1));
+										$this->assertEquals(0, $multiTen(0));
+									}
+
+									public function testDouble()
+									{
+										$inc = function ($arg) {
+											return $arg + 1;
+										};
+										$inc2 = double($inc);
+
+										$this->assertEquals(4, $inc2(2));
+										$this->assertEquals(12, $inc2(10));
+
+										$inc4 = double($inc2);
+										$this->assertEquals(6, $inc4(2));
+									}
+								}
+
+	
+			
+			

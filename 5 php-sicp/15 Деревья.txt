@@ -1,0 +1,68 @@
+
+	Цель: Изучить структуру данных «двоичное дерево» и ее реализацию в PHP с помощью списков.
+	
+	Деревья некоторая структура из узлов и связей между ними.
+	
+	
+ССЫЛКИ
+	https://ru.wikipedia.org/wiki/Дерево_(структура_данных)
+	https://ru.hexlet.io/courses/introduction_to_algorithms/lessons/trees/theory_unit
+	
+	
+
+ТЕСТЫ
+	Почему дерево можно назвать рекурсивной структурой данных?
+		потому что каждая часть дерева по сути является деревом само по себе
+		
+	Для реализации деревьев с помощью списков, списки должны иметь возможность
+		хранить в себе списки
+		
+	Выберите правильное представление данного дерева в виде списка
+		(A F (C G) (B (E D O)))
+		
+	Сколько нужно вложенных списков для представления дерева, состоящего из трех элементов (узлов)?
+		невозможно ответить на этот вопрос однозначно, ответ зависит от структуры дерева
+		
+
+		
+ЗАДАНИЕ
+	Solutioin.php
+	Реализуйте функцию reverse, которая переворачивает переданный на вход список рекурсивно.
+	Подсказки
+	Функция isPair проверяет является ли значение парой.
+	
+	
+										// файл Solution.php
+											<?php
+
+											namespace App\Solution;
+
+											require 'Pair.php';
+
+											use function App\Pair\car;
+											use function App\Pair\isPair;
+											use function App\Pair\cdr;
+											use function App\Pair\cons;
+											use function App\Pair\listToString;
+
+											function reverse($list)
+											{
+												// BEGIN (write your solution here)
+												$iter = function ($items, $acc) use (&$iter) {
+													if ($items === null) {
+														return $acc;
+													} else {
+														$element = car($items);
+														if (isPair($element)) {
+															$result = reverse($element);
+														} else {
+															$result = $element;
+														}
+														return $iter(cdr($items), cons($result, $acc));
+													}
+												};
+												return $iter($list, null);
+												// END
+											}
+											
+											

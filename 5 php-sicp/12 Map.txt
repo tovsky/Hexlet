@@ -1,0 +1,61 @@
+
+	Цель: Познакомиться с функцией высшего порядка, позволяющей применять переданную функцию к 
+	 элементам множества.
+	 
+	
+	
+	
+	
+ССЫЛКИ
+	https://en.wikipedia.org/wiki/Map_(higher-order_function)
+	https://ru.wikipedia.org/wiki/Map
+	
+	
+ТЕСТЫ
+	Что необходимо иметь для использования map?
+		функция и множество элементов, к которым нужно применить эту функцию
+		
+	Чем подход с map отличается от простого вызова нужной функции в цикле?
+		с map можно использовать любую функцию
+		
+	Наша реализация map (из видео) — рекурсивная.
+		да, конечно
+		
+	Для каких случаев уместно использовать map?
+		необходимо увеличить все числа множества на 2
+		необходимо сделать так, чтобы все слова из списка слов начинались с большой буквы
+	
+	
+	
+ЗАДАНИЕ
+	Solution.php
+	Реализуйте map используя итеративный процесс.
+	
+	Подсказки:
+	Функция reverse переворачивает список. Она доступна в скрипте.
+	
+								<?php
+
+								namespace App\Solution;
+
+								require_once 'Pair.php';
+
+								use function App\Pair\cons;
+								use function App\Pair\car;
+								use function App\Pair\cdr;
+								use function App\Pair\reverse;
+								use function App\Pair\listToString;
+
+								function map($func, $list)
+								{
+									// BEGIN (write your solution here)
+									$iter = function ($list, $acc) use (&$iter, $func) {
+										if ($list === null) {
+											return reverse($acc);
+										}
+
+										return $iter(cdr($list), cons($func(car($list)), $acc));
+									};
+									return $iter($list, null);
+									// END
+								}

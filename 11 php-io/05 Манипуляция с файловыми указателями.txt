@@ -37,3 +37,121 @@
 	Если файла базы не существует, то он должен создаваться в конструкторе
 	Если ключа не существует, то операция get должна выкидывать исключение Db\NotFoundException
 	
+						
+						
+							// Файл Db.php
+								<?php
+
+								namespace App;
+
+								class Db
+								{
+									const KEY_LENGTH = 8;
+									const VALUE_LENGTH = 100;
+									// BEGIN (write your solution here)
+										const ZERO = '\0';
+
+									private $db;
+
+									public function __construct($file)
+									{
+										if (!file_exists($file)) {
+											touch($file);
+										}
+										$this->db = new \SplFileObject($file, 'r+');
+									}
+
+									public function get($key)
+									{
+										$this->db->rewind();
+										while (!$this->db->eof()) {
+											$possibleKey = trim($this->db->fread(self::KEY_LENGTH), self::ZERO);
+											if ($key === $possibleKey) {
+												return trim($this->db->fread(self::VALUE_LENGTH), self::ZERO);
+											}
+										}
+
+										throw new Db\NotFoundException("'$key' is not exists");
+									}
+
+									public function set($key, $value)
+									{
+										$this->db->rewind();
+										while (!$this->db->eof()) {
+											$possibleKey = trim($this->db->fread(self::KEY_LENGTH), self::ZERO);
+											if ($key === $possibleKey) {
+												$this->write($value, self::VALUE_LENGTH);
+												return;
+											}
+											$this->db->fread(self::VALUE_LENGTH);
+										}
+
+										$this->write($key, self::KEY_LENGTH);
+										$this->write($value, self::VALUE_LENGTH);
+									}
+
+									private function write($data, $length)
+									{
+										$zeroLength = $length - strlen($data);
+										$this->db->fwrite($data);
+										$this->db->fwrite(str_repeat(self::ZERO, $zeroLength));
+									}
+									// END
+								}
+
+							
+							DbTest.php
+								<?php
+
+								namespace App\Tests;
+
+								use \PHPUnit\Framework\TestCase;
+								use \App\Db;
+
+								class DbTest extends TestCase
+								{
+									private $db;
+
+									public function setUp()
+									{
+										$file = '/tmp/db.dblite';
+										if (file_exists($file)) {
+											unlink($file);
+										}
+										$this->db = new Db($file);
+									}
+
+									public function testDb()
+									{
+										$this->db->set('key', 'value');
+										$this->assertEquals('value', $this->db->get('key'));
+
+										$this->db->set('key2', 'value2');
+										$this->assertEquals('value2', $this->db->get('key2'));
+
+										$this->db->set('key', 'another value');
+										$this->assertEquals('another value', $this->db->get('key'));
+									}
+
+									public function testBug()
+									{
+										$this->db->set('one', 'two');
+										$this->db->set('two', 'some data');
+										$this->db->set('three', 'another data');
+										$this->assertEquals('two', $this->db->get('one'));
+									}
+
+									/**
+									 * @expectedException App\Db\NotFoundException
+									 */
+									public function testGetException()
+									{
+										$this->db->get('key');
+									}
+								}
+
+							
+							
+							
+							
+						

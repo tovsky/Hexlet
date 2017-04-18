@@ -41,18 +41,34 @@
 	Напишите тесты на функцию mkdirs, которая рекурсивно создает директории для переданного пути.
 	
 									// Мое решение
-										// Файл mrdir()
+																		
+										
 											<?php
 
 											namespace App;
 
-											function mkdirs($path)
+											require getenv('COMPOSER_HOME') . '/vendor/autoload.php';
+
+											// BEGIN (write your solution here)
+											use org\bovigo\vfs\vfsStream;
+											// END
+
+											class TestSolution extends \PHPUnit_Framework_TestCase
 											{
-												return mkdir($path, 0700, true);
+												// BEGIN (write your solution here)
+												public function testMkdirs()
+												{
+													$root = vfsStream::setup('root');
+
+													mkdirs(vfsStream::url('root') . '/test');
+													$this->assertTrue($root->hasChild('test'));
+
+													mkdirs(vfsStream::url('root') . '/test/inner');
+													$this->assertTrue($root->hasChild('test/inner'));
+												}
+												// END
 											}
-												
-	
-	
+
 	
 	
 	
